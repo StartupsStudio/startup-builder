@@ -1,0 +1,964 @@
+---
+title: "The Four Function Primitives: Code, Generative, Agentic, and Human Functions Explained"
+description: "Master the four function primitives that power autonomous startups: code, generative, agentic, and human functions."
+date: "2026-02-12"
+author: "Startup Builder Team"
+tags: ["function-primitives", "ai-automation", "business-architecture"]
+---
+
+# The Four Function Primitives: Code, Generative, Agentic, and Human Functions Explained
+
+Every business function - from customer support to financial reporting - can be categorized into one of four primitives. Understanding these primitives is the key to building autonomous startups that scale without proportional headcount growth.
+
+In 2026, successful founders don't ask "who should do this?" They ask "which primitive should handle this?"
+
+## The Four Function Primitives
+
+### 1. Code Functions (Deterministic Automation)
+### 2. Generative Functions (AI-Generated Content)
+### 3. Agentic Functions (Autonomous AI Agents)
+### 4. Human Functions (Strategic Human Judgment)
+
+Let's explore each primitive in depth.
+
+## 1. Code Functions: Deterministic Automation
+
+**Definition**: Pure logic-based automation with deterministic outcomes. Given the same inputs, code functions always produce the same outputs.
+
+**When to Use**:
+- Rules-based processes
+- Data transformations
+- Calculations and computations
+- Scheduled tasks
+- API integrations with predictable flows
+
+### Code Function Examples
+
+**Revenue Calculation**:
+```typescript
+const calculateMRR = codeFunction({
+  name: "calculateMonthlyRecurringRevenue",
+  inputs: ["subscriptions", "date"],
+
+  implementation: ({ subscriptions, date }) => {
+    const activeSubscriptions = subscriptions.filter(sub =>
+      sub.status === "active" &&
+      sub.startDate <= date &&
+      (!sub.endDate || sub.endDate > date)
+    )
+
+    const mrr = activeSubscriptions.reduce((total, sub) => {
+      const monthlyAmount = sub.billingPeriod === "annual"
+        ? sub.amount / 12
+        : sub.amount
+
+      return total + monthlyAmount
+    }, 0)
+
+    return {
+      mrr,
+      subscriberCount: activeSubscriptions.length,
+      arpu: mrr / activeSubscriptions.length
+    }
+  },
+
+  schedule: "daily at 00:00 UTC",
+  outputs: ["metrics-dashboard", "financial-reports"]
+})
+```
+
+**User Provisioning**:
+```typescript
+const provisionNewUser = codeFunction({
+  name: "provisionUser",
+  trigger: "user.signed_up",
+
+  implementation: async ({ user, plan }) => {
+    // Create user account
+    const account = await db.accounts.create({
+      userId: user.id,
+      plan: plan.tier,
+      limits: plan.limits,
+      createdAt: Date.now()
+    })
+
+    // Set up infrastructure
+    await api.infrastructure.provision({
+      accountId: account.id,
+      resources: plan.resources
+    })
+
+    // Send welcome email
+    await api.email.send({
+      to: user.email,
+      template: "welcome",
+      data: { userName: user.name, plan: plan.name }
+    })
+
+    // Add to CRM
+    await api.crm.createContact({
+      email: user.email,
+      properties: {
+        plan: plan.tier,
+        signupDate: Date.now(),
+        source: user.source
+      }
+    })
+
+    return { success: true, accountId: account.id }
+  }
+})
+```
+
+**Churn Detection**:
+```typescript
+const detectChurnRisk = codeFunction({
+  name: "identifyChurnRisk",
+  schedule: "daily at 06:00 UTC",
+
+  implementation: async () => {
+    const users = await db.users.findAll({
+      where: { status: "active" }
+    })
+
+    const churnRiskUsers = users.filter(user => {
+      const daysSinceLastLogin = daysBetween(user.lastLoginAt, Date.now())
+      const usageThisMonth = user.metrics.usage.current
+      const usageLastMonth = user.metrics.usage.previous
+      const supportTickets = user.support.openTickets
+
+      // Churn risk criteria
+      return (
+        daysSinceLastLogin > 14 ||
+        usageThisMonth < usageLastMonth * 0.5 ||
+        supportTickets.length > 3
+      )
+    })
+
+    // Trigger retention workflow
+    for (const user of churnRiskUsers) {
+      await api.workflows.trigger("retention-intervention", {
+        userId: user.id,
+        riskFactors: analyzeRiskFactors(user)
+      })
+    }
+
+    return {
+      totalUsers: users.length,
+      atRisk: churnRiskUsers.length,
+      riskPercentage: (churnRiskUsers.length / users.length) * 100
+    }
+  }
+})
+```
+
+### Code Function Best Practices
+
+1. **Idempotency**: Ensure functions can be safely retried
+2. **Error Handling**: Comprehensive error handling and logging
+3. **Performance**: Optimize for speed and resource usage
+4. **Testing**: Unit tests for all logic paths
+5. **Monitoring**: Track execution time, success rate, errors
+
+```typescript
+const codeFunction = ({
+  name,
+  implementation,
+  options = {}
+}) => ({
+  execute: async (inputs) => {
+    const startTime = Date.now()
+
+    try {
+      // Validate inputs
+      validateInputs(inputs, options.schema)
+
+      // Execute with timeout
+      const result = await Promise.race([
+        implementation(inputs),
+        timeout(options.timeout || 30000)
+      ])
+
+      // Log success metrics
+      logMetric({
+        function: name,
+        duration: Date.now() - startTime,
+        status: "success"
+      })
+
+      return result
+    } catch (error) {
+      // Log error
+      logError({
+        function: name,
+        error: error.message,
+        inputs: sanitize(inputs)
+      })
+
+      // Retry if configured
+      if (options.retry && attempt < options.retry.maxAttempts) {
+        await sleep(options.retry.backoff)
+        return execute(inputs, attempt + 1)
+      }
+
+      throw error
+    }
+  }
+})
+```
+
+## 2. Generative Functions: AI-Generated Content
+
+**Definition**: AI-powered functions that generate content, text, code, or other creative outputs based on prompts and context.
+
+**When to Use**:
+- Content creation (blog posts, social media, emails)
+- Code generation
+- Copywriting and marketing materials
+- Personalization at scale
+- Data analysis and insights
+
+### Generative Function Examples
+
+**Blog Post Generation**:
+```typescript
+const generateBlogPost = generativeFunction({
+  name: "createSEOBlogPost",
+  model: "claude-opus-4.5",
+
+  prompt: `You are an expert content marketer writing for {audience}.
+
+Topic: {topic}
+Keywords: {keywords}
+Competitor articles: {competitorUrls}
+
+Write a comprehensive blog post that:
+1. Outranks competitor content
+2. Naturally incorporates keywords
+3. Provides unique insights and examples
+4. Includes actionable takeaways
+5. Is 1500-2000 words
+
+Format in MDX with proper frontmatter.`,
+
+  inputs: {
+    topic: "string",
+    keywords: "string[]",
+    audience: "ICP",
+    competitorUrls: "string[]"
+  },
+
+  postProcessing: async (generatedContent) => {
+    // SEO optimization
+    const optimized = await optimizeForSEO(generatedContent)
+
+    // Fact checking
+    const factChecked = await verifyFactualClaims(optimized)
+
+    // Plagiarism check
+    const isOriginal = await checkOriginality(factChecked)
+
+    if (!isOriginal) {
+      // Regenerate with uniqueness emphasis
+      return regenerate({ emphasize: "unique-insights" })
+    }
+
+    return factChecked
+  },
+
+  quality: {
+    readabilityScore: ">= 70",
+    seoScore: ">= 80",
+    uniqueness: ">= 95%"
+  }
+})
+```
+
+**Personalized Email Campaigns**:
+```typescript
+const generatePersonalizedEmail = generativeFunction({
+  name: "personalizedOutreach",
+  model: "claude-sonnet-4.5",
+
+  prompt: `Write a personalized sales email for {prospectName} at {companyName}.
+
+Prospect Research:
+- Title: {title}
+- Company: {companyInfo}
+- Recent activity: {recentActivity}
+- Pain points: {painPoints}
+
+Our product: {productDescription}
+Relevant case study: {caseStudy}
+
+Write an email that:
+1. References their specific situation
+2. Addresses their pain points
+3. Provides relevant proof points
+4. Includes clear CTA
+5. Feels personal, not templated
+6. Is under 150 words`,
+
+  inputs: {
+    prospectName: "string",
+    companyName: "string",
+    title: "string",
+    companyInfo: "object",
+    recentActivity: "string",
+    painPoints: "string[]",
+    productDescription: "string",
+    caseStudy: "object"
+  },
+
+  batch: true, // Generate multiple variants
+  variants: 3,
+
+  evaluation: async (variants, prospect) => {
+    // Score each variant
+    const scored = variants.map(email => ({
+      email,
+      score: scoreEmail(email, {
+        personalization: evaluatePersonalization(email, prospect),
+        clarity: evaluateCTA(email),
+        tone: evaluateTone(email),
+        length: email.split(" ").length
+      })
+    }))
+
+    // Return highest scoring
+    return scored.sort((a, b) => b.score - a.score)[0].email
+  }
+})
+```
+
+**Code Generation**:
+```typescript
+const generateAPIEndpoint = generativeFunction({
+  name: "createAPIEndpoint",
+  model: "specialized-coding-model",
+
+  prompt: `Generate a production-ready API endpoint with:
+
+Function: {functionDescription}
+Input schema: {inputSchema}
+Output schema: {outputSchema}
+Database: {databaseSchema}
+
+Include:
+- Input validation
+- Error handling
+- Authentication check
+- Rate limiting
+- Logging
+- Unit tests
+- OpenAPI documentation
+
+Follow our code style guide: {styleGuide}`,
+
+  inputs: {
+    functionDescription: "string",
+    inputSchema: "object",
+    outputSchema: "object",
+    databaseSchema: "object",
+    styleGuide: "string"
+  },
+
+  validation: async (generatedCode) => {
+    // Syntax validation
+    const syntaxValid = await validateSyntax(generatedCode)
+
+    // Security scan
+    const securityScan = await scanForVulnerabilities(generatedCode)
+
+    // Test execution
+    const testsPass = await runGeneratedTests(generatedCode)
+
+    // Style compliance
+    const styleCompliant = await checkStyleGuide(generatedCode)
+
+    return {
+      valid: syntaxValid && securityScan.safe && testsPass && styleCompliant,
+      issues: [
+        ...securityScan.issues,
+        ...styleCompliant.violations
+      ]
+    }
+  }
+})
+```
+
+### Generative Function Best Practices
+
+1. **Clear Prompts**: Specific, detailed instructions yield better outputs
+2. **Context Loading**: Provide all relevant context in prompt
+3. **Output Validation**: Always validate and verify generated content
+4. **Human Review**: Consider human-in-the-loop for quality assurance
+5. **Iteration**: Use feedback loops to improve generation quality
+
+## 3. Agentic Functions: Autonomous AI Agents
+
+**Definition**: Self-directed AI agents that can plan, execute multi-step workflows, use tools, and adapt to changing conditions autonomously.
+
+**When to Use**:
+- Complex, multi-step processes
+- Tasks requiring judgment and adaptation
+- Workflows with uncertainty
+- Activities needing tool use and API calls
+- Processes requiring research and analysis
+
+### Agentic Function Examples
+
+**Customer Support Agent**:
+```typescript
+const customerSupportAgent = agenticFunction({
+  name: "tier1Support",
+  agent: "customer-success-specialist",
+
+  capabilities: [
+    "ticket-triage",
+    "documentation-search",
+    "issue-diagnosis",
+    "solution-implementation",
+    "escalation-judgment"
+  ],
+
+  tools: [
+    {
+      name: "search_docs",
+      description: "Search product documentation",
+      implementation: (query) => api.docs.search(query)
+    },
+    {
+      name: "check_user_account",
+      description: "Get user account details and history",
+      implementation: (userId) => db.users.findWithHistory(userId)
+    },
+    {
+      name: "run_diagnostic",
+      description: "Run diagnostic check on user's instance",
+      implementation: (accountId) => api.diagnostics.run(accountId)
+    },
+    {
+      name: "apply_fix",
+      description: "Apply a fix to user's account",
+      implementation: (accountId, fix) => api.fixes.apply(accountId, fix),
+      requiresApproval: true
+    },
+    {
+      name: "escalate_to_human",
+      description: "Escalate ticket to human support",
+      implementation: (ticket, reason) => api.support.escalate(ticket, reason)
+    }
+  ],
+
+  workflow: async ({ ticket, context }) => {
+    // Agent autonomously plans and executes
+    const plan = await agent.plan({
+      goal: "Resolve customer ticket efficiently",
+      ticket: ticket,
+      context: context,
+      constraints: [
+        "Resolve in under 15 minutes if possible",
+        "Escalate if issue is billing-related",
+        "Escalate if fix requires code changes",
+        "Always confirm resolution with customer"
+      ]
+    })
+
+    const result = await agent.execute(plan, {
+      maxSteps: 10,
+      timeout: 900000, // 15 minutes
+      humanInTheLoop: {
+        required: ["apply_fix"],
+        available: true
+      }
+    })
+
+    return result
+  },
+
+  autonomy: "high",
+  humanEscalation: {
+    triggers: [
+      "unable-to-resolve-in-15-minutes",
+      "billing-or-payment-issue",
+      "requires-code-change",
+      "customer-requests-human"
+    ]
+  }
+})
+```
+
+**Sales Development Agent**:
+```typescript
+const salesDevelopmentAgent = agenticFunction({
+  name: "outboundSDR",
+  agent: "sales-development-rep",
+
+  goal: "Book qualified demos with ICP prospects",
+
+  tools: [
+    {
+      name: "find_prospects",
+      description: "Search for prospects matching ICP",
+      implementation: (criteria) => api.apollo.search(criteria)
+    },
+    {
+      name: "enrich_prospect",
+      description: "Get detailed information about prospect",
+      implementation: (email) => api.clearbit.enrich(email)
+    },
+    {
+      name: "find_contact_info",
+      description: "Find email and phone for prospect",
+      implementation: (name, company) => api.lusha.findContact(name, company)
+    },
+    {
+      name: "send_email",
+      description: "Send personalized outreach email",
+      implementation: (to, content) => api.email.send(to, content)
+    },
+    {
+      name: "schedule_demo",
+      description: "Book demo on calendar",
+      implementation: (prospect, time) => api.calendly.schedule(prospect, time)
+    },
+    {
+      name: "update_crm",
+      description: "Update CRM with activity",
+      implementation: (prospect, activity) => api.crm.log(prospect, activity)
+    }
+  ],
+
+  workflow: async ({ dailyTarget = 50 }) => {
+    const results = []
+
+    while (results.length < dailyTarget) {
+      // Find prospects
+      const prospects = await agent.use("find_prospects", {
+        criteria: icp,
+        limit: 10,
+        exclude: previouslyContacted
+      })
+
+      // Process each prospect
+      for (const prospect of prospects) {
+        // Research prospect
+        const enriched = await agent.use("enrich_prospect", prospect.email)
+
+        // Find contact info if needed
+        if (!enriched.email) {
+          enriched.email = await agent.use("find_contact_info",
+            prospect.name,
+            prospect.company
+          )
+        }
+
+        // Generate personalized outreach
+        const email = await agent.generate("outreach_email", {
+          prospect: enriched,
+          personalization: extractPersonalizationPoints(enriched)
+        })
+
+        // Send email
+        await agent.use("send_email", enriched.email, email)
+
+        // Update CRM
+        await agent.use("update_crm", prospect, {
+          activity: "outreach_sent",
+          email: email,
+          timestamp: Date.now()
+        })
+
+        results.push({
+          prospect: prospect,
+          status: "contacted"
+        })
+      }
+
+      // Pause to avoid rate limits
+      await sleep(60000) // 1 minute
+    }
+
+    return {
+      contacted: results.length,
+      targetMet: results.length >= dailyTarget
+    }
+  },
+
+  schedule: "daily at 09:00 EST",
+  monitoring: {
+    metrics: ["contacts-per-day", "response-rate", "demos-booked"],
+    alerts: ["response-rate < 5%", "demos-booked < 2"]
+  }
+})
+```
+
+**Content Marketing Agent**:
+```typescript
+const contentMarketingAgent = agenticFunction({
+  name: "contentMarketer",
+  agent: "growth-marketer",
+
+  goal: "Drive organic traffic through SEO content",
+
+  tools: [
+    {
+      name: "keyword_research",
+      description: "Find high-value keywords",
+      implementation: (topic) => api.ahrefs.keywordResearch(topic)
+    },
+    {
+      name: "competitor_analysis",
+      description: "Analyze competitor content",
+      implementation: (keyword) => api.semrush.analyzeCompetitors(keyword)
+    },
+    {
+      name: "generate_outline",
+      description: "Create content outline",
+      implementation: generativeFunction("content-outline")
+    },
+    {
+      name: "write_article",
+      description: "Write full article",
+      implementation: generativeFunction("blog-post")
+    },
+    {
+      name: "optimize_seo",
+      description: "Optimize content for SEO",
+      implementation: (content) => api.surfer.optimize(content)
+    },
+    {
+      name: "generate_images",
+      description: "Create featured images",
+      implementation: (topic) => api.dalle.generate(topic)
+    },
+    {
+      name: "publish_post",
+      description: "Publish to blog",
+      implementation: (post) => api.blog.publish(post)
+    },
+    {
+      name: "promote_social",
+      description: "Share on social media",
+      implementation: (post) => api.social.share(post)
+    }
+  ],
+
+  workflow: async ({ frequency = "2-per-week" }) => {
+    // Research phase
+    const keywords = await agent.use("keyword_research", icp.topics)
+
+    const prioritized = keywords
+      .filter(kw => kw.difficulty < 40 && kw.volume > 500)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10)
+
+    // Content creation phase
+    for (const keyword of prioritized) {
+      // Analyze competition
+      const competitors = await agent.use("competitor_analysis", keyword)
+
+      // Create better content
+      const outline = await agent.use("generate_outline", {
+        keyword: keyword,
+        competitors: competitors,
+        approach: "comprehensive-and-actionable"
+      })
+
+      const article = await agent.use("write_article", {
+        outline: outline,
+        keyword: keyword,
+        wordCount: 2000
+      })
+
+      // SEO optimization
+      const optimized = await agent.use("optimize_seo", article)
+
+      // Visual assets
+      const images = await agent.use("generate_images", keyword.topic)
+
+      // Publish
+      const published = await agent.use("publish_post", {
+        content: optimized,
+        images: images,
+        metadata: {
+          keywords: keyword.variations,
+          category: keyword.category
+        }
+      })
+
+      // Promotion
+      await agent.use("promote_social", published)
+
+      // Rate limiting
+      await sleep(3 * 24 * 60 * 60 * 1000) // 3 days between posts
+    }
+  },
+
+  schedule: "continuous",
+  humanReview: {
+    required: false,
+    available: true,
+    reviewBefore: "publish_post"
+  }
+})
+```
+
+### Agentic Function Best Practices
+
+1. **Clear Goals**: Define specific, measurable objectives
+2. **Tool Access**: Provide necessary tools and APIs
+3. **Safety Rails**: Set constraints and escalation triggers
+4. **Monitoring**: Track agent decisions and outcomes
+5. **Human Oversight**: Enable human-in-the-loop for critical actions
+
+## 4. Human Functions: Strategic Judgment
+
+**Definition**: Tasks requiring human judgment, relationships, creativity, or strategic thinking that shouldn't (yet) be fully automated.
+
+**When to Use**:
+- Strategic decisions
+- High-value negotiations
+- Creative vision and direction
+- Relationship building
+- Crisis management
+- Ethical judgment calls
+
+### Human Function Examples
+
+**Strategic Partnership Approval**:
+```typescript
+const approvePartnership = humanFunction({
+  name: "partnershipApproval",
+  role: "founder",
+
+  trigger: "partnership.proposed",
+
+  context: async ({ partnership }) => ({
+    proposal: partnership.terms,
+    partner: await enrichPartnerData(partnership.partner),
+    analysis: await agenticFunction("analyzePartnership")(partnership),
+    recommendations: await generativeFunction("partnershipRecommendations")(partnership),
+    financialImpact: await codeFunction("calculatePartnershipROI")(partnership)
+  }),
+
+  decision: {
+    options: ["approve", "reject", "negotiate", "defer"],
+    sla: "48 hours",
+    timeout: {
+      action: "defer",
+      notify: "founder@startup.com"
+    }
+  },
+
+  workflow: async ({ context, decision }) => {
+    if (decision === "approve") {
+      await api.partnerships.execute(context.partnership)
+      await api.legal.generateContract(context.partnership)
+    } else if (decision === "negotiate") {
+      await agenticFunction("negotiateTerms")({
+        partnership: context.partnership,
+        objectives: decision.objectives
+      })
+    }
+  }
+})
+```
+
+**Product Roadmap Decisions**:
+```typescript
+const approveRoadmap = humanFunction({
+  name: "quarterlyRoadmapApproval",
+  role: "founder",
+  frequency: "quarterly",
+
+  preparation: async () => {
+    // AI generates draft roadmap
+    const aiProposal = await agenticFunction("generateRoadmap")({
+      customerFeedback: await db.feedback.analyze(),
+      competitiveAnalysis: await agenticFunction("analyzeCompetitors")(),
+      technicalDebt: await codeFunction("assessTechnicalDebt")(),
+      businessGoals: await db.goals.current()
+    })
+
+    // Data-driven insights
+    const insights = await generativeFunction("roadmapInsights")({
+      proposal: aiProposal,
+      historicalData: await db.roadmaps.historical(),
+      marketTrends: await api.trends.analyze()
+    })
+
+    return {
+      aiProposal,
+      insights,
+      tradeoffAnalysis: await codeFunction("analyzeTradeoffs")(aiProposal)
+    }
+  },
+
+  decision: {
+    type: "roadmap-approval",
+    allowModifications: true,
+    requiredReview: ["engineering-feasibility", "business-impact", "customer-value"]
+  },
+
+  postDecision: async ({ approvedRoadmap }) => {
+    await db.roadmap.save(approvedRoadmap)
+    await api.engineering.updateBacklog(approvedRoadmap)
+    await agenticFunction("communicateRoadmap")({
+      roadmap: approvedRoadmap,
+      audiences: ["team", "customers", "investors"]
+    })
+  }
+})
+```
+
+**High-Value Contract Negotiations**:
+```typescript
+const negotiateEnterpriseContract = humanFunction({
+  name: "enterpriseNegotiation",
+  role: "founder",
+
+  trigger: {
+    event: "deal.entered_negotiation",
+    condition: (deal) => deal.value > 100000
+  },
+
+  preparation: async ({ deal }) => {
+    return {
+      customerProfile: await agenticFunction("researchCustomer")(deal.customer),
+      competitiveLandscape: await agenticFunction("analyzeCompetitors")(deal.customer),
+      pricingAnalysis: await codeFunction("analyzePricingOptions")(deal),
+      negotiationStrategy: await generativeFunction("suggestNegotiationStrategy")({
+        deal: deal,
+        historicalData: await db.deals.similar(deal)
+      }),
+      walkawayPoint: await codeFunction("calculateMinimumViable")(deal)
+    }
+  },
+
+  support: {
+    // AI co-pilot during negotiation
+    realTimeAssistance: agenticFunction("negotiationCopilot"),
+    suggestedResponses: generativeFunction("responseGenerator"),
+    dataLookup: codeFunction("fetchRelevantData")
+  },
+
+  decision: {
+    options: ["accept-terms", "counter-offer", "walk-away", "escalate"],
+    timeframe: "synchronous", // Real-time during call/meeting
+  },
+
+  postDecision: async ({ decision, finalTerms }) => {
+    if (decision === "accept-terms") {
+      await api.legal.generateContract(finalTerms)
+      await agenticFunction("executeOnboarding")(deal.customer)
+    }
+
+    await db.deals.update(deal.id, {
+      status: decision,
+      finalTerms: finalTerms,
+      closedAt: Date.now()
+    })
+  }
+})
+```
+
+### Human Function Best Practices
+
+1. **AI Preparation**: Use AI to prepare context and recommendations
+2. **Clear Decision Framework**: Define options and criteria
+3. **Time Bounds**: Set SLAs and timeout behaviors
+4. **Context Rich**: Provide all relevant data for informed decisions
+5. **Execution Support**: Automate follow-through after human decision
+
+## Choosing the Right Primitive
+
+Use this decision tree:
+
+```typescript
+const choosePrimitive = (task) => {
+  // Is the logic deterministic and rule-based?
+  if (task.hasExactRules && task.outputPredictable) {
+    return "CODE_FUNCTION"
+  }
+
+  // Does it require content/text generation?
+  if (task.requiresCreativeOutput || task.needsPersonalization) {
+    // Is it single-step generation?
+    if (task.singleStep && !task.needsTools) {
+      return "GENERATIVE_FUNCTION"
+    }
+    // Multi-step with tool use?
+    return "AGENTIC_FUNCTION"
+  }
+
+  // Does it require multi-step reasoning and tool use?
+  if (task.requiresPlanning && task.needsAdaptation) {
+    return "AGENTIC_FUNCTION"
+  }
+
+  // Does it require human judgment?
+  if (
+    task.highStakes ||
+    task.requiresRelationships ||
+    task.ethicalImplications ||
+    task.strategicImportance
+  ) {
+    return "HUMAN_FUNCTION"
+  }
+
+  // Default to most appropriate
+  return analyzeTaskCharacteristics(task)
+}
+```
+
+## Composing Primitives
+
+The real power comes from composing primitives:
+
+```typescript
+const customerOnboarding = workflow({
+  name: "enterpriseOnboarding",
+
+  steps: [
+    // Code: Provision account
+    codeFunction("createAccount"),
+
+    // Generative: Create personalized welcome
+    generativeFunction("personalizedWelcome"),
+
+    // Agentic: Schedule and conduct kickoff call
+    agenticFunction("conductKickoff"),
+
+    // Code: Configure integrations
+    codeFunction("setupIntegrations"),
+
+    // Agentic: Provide ongoing support
+    agenticFunction("onboardingSupport"),
+
+    // Human: Strategic business review (if enterprise)
+    humanFunction("quarterlyBusinessReview", {
+      condition: (customer) => customer.tier === "enterprise"
+    })
+  ],
+
+  orchestration: "sequential-with-fallbacks"
+})
+```
+
+## The Future: Primitive-First Design
+
+In 2026, successful founders design their businesses primitive-first:
+
+1. **Map all business functions**
+2. **Categorize each by primitive**
+3. **Automate everything except strategic human functions**
+4. **Continuously evaluate if human functions can become agentic**
+5. **Scale without proportional headcount increase**
+
+The four primitives aren't just a framework - they're the operating system for autonomous startups.
+
+---
+
+**Start building with primitives**: Explore [startup-builder](https://startup-builder.dev) and design your business with function primitives.

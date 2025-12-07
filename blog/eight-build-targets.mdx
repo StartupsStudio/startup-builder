@@ -1,0 +1,874 @@
+---
+title: "Site, App, API, CLI, SDK, Docs, Blog: The 8 Build Targets Every Startup Needs"
+description: "Understand the 8 essential build targets modern startups need in 2026 and how startup-builder generates them all automatically."
+date: "2026-04-02"
+author: "Startup Builder Team"
+tags: ["build-targets", "infrastructure", "full-stack"]
+---
+
+# Site, App, API, CLI, SDK, Docs, Blog: The 8 Build Targets Every Startup Needs
+
+In 2026, a successful startup isn't just a product - it's an ecosystem of complementary artifacts that serve different users and use cases. startup-builder generates all eight automatically from your business definition.
+
+Let's explore each build target and why it matters.
+
+## The 8 Essential Build Targets
+
+```typescript
+const buildTargets = {
+  site: "Marketing website for customer acquisition",
+  app: "Product application for end users",
+  api: "Backend services and integrations",
+  cli: "Command-line interface for power users",
+  mcp: "Model Context Protocol server for AI agents",
+  sdk: "Client libraries for developers",
+  docs: "Comprehensive product documentation",
+  blog: "Content marketing and SEO"
+}
+```
+
+Each serves a specific purpose in your startup ecosystem.
+
+## 1. Site (Marketing Website)
+
+**Purpose**: Convert visitors into customers
+
+**Generated from**:
+```typescript
+const startup = defineStartup({
+  name: "TaskFlow",
+  tagline: "Project management for distributed teams",
+
+  icp: {
+    persona: "Engineering Manager",
+    company: "Series A-C startups",
+    painPoints: ["context-switching", "tool-sprawl"]
+  },
+
+  product: {
+    features: [...],
+    pricing: {...}
+  }
+})
+
+// Generates complete marketing site:
+// - Homepage with value prop derived from ICP
+// - Features page from product.features
+// - Pricing page from product.pricing
+// - About, Contact, Legal pages
+// - SEO optimization for ICP keywords
+```
+
+**What's generated**:
+- Hero section with ICP-targeted messaging
+- Feature showcases with screenshots
+- Social proof and testimonials
+- Pricing comparison tables
+- CTAs optimized for conversion
+- Blog integration
+- SEO metadata and structured data
+- Analytics and conversion tracking
+
+**Example output**:
+```tsx
+// Auto-generated homepage
+export function HomePage() {
+  return (
+    <>
+      <Hero
+        headline="Stop Losing Engineers to Context-Switching"
+        subheadline="TaskFlow unifies GitHub, Jira, and Slack into one intelligent workspace"
+        cta="Start Free Trial"
+        socialProof="Trusted by 500+ engineering teams"
+      />
+
+      <Features features={product.features} />
+
+      <Testimonials segment={icp.industry} />
+
+      <Pricing tiers={product.pricing.tiers} />
+
+      <CTA
+        headline="Join 500+ Teams Building Better"
+        cta="Start Free Trial"
+      />
+    </>
+  )
+}
+```
+
+## 2. App (Product Application)
+
+**Purpose**: Deliver your core product value
+
+**Generated from**:
+```typescript
+const startup = defineStartup({
+  product: {
+    features: [
+      {
+        name: "Unified Task View",
+        description: "All your tasks in one place",
+        implementation: agenticFunction({
+          sources: ["github", "jira", "linear"],
+          output: "unified-task-list"
+        }),
+        ui: {
+          layout: "list",
+          filters: ["status", "priority", "assignee"],
+          actions: ["create", "update", "complete"]
+        }
+      }
+    ]
+  }
+})
+
+// Generates complete product app:
+// - Authentication flows
+// - Feature implementations
+// - Data management
+// - Real-time updates
+// - Responsive design
+```
+
+**What's generated**:
+- Authentication (email, OAuth)
+- User dashboard
+- Feature implementations
+- Settings and preferences
+- Team management
+- Billing integration
+- Notifications
+- Mobile-responsive UI
+
+**Example output**:
+```tsx
+// Auto-generated feature component
+export function UnifiedTaskView() {
+  const { tasks, loading } = useTasks({
+    sources: ['github', 'jira', 'linear'],
+    realtime: true
+  })
+
+  const [filters, setFilters] = useFilters()
+
+  return (
+    <Layout>
+      <Filters
+        options={['status', 'priority', 'assignee']}
+        values={filters}
+        onChange={setFilters}
+      />
+
+      <TaskList
+        tasks={tasks}
+        loading={loading}
+        actions={['create', 'update', 'complete']}
+        onAction={handleAction}
+      />
+    </Layout>
+  )
+}
+```
+
+## 3. API (Backend Services)
+
+**Purpose**: Power your app and enable integrations
+
+**Generated from**:
+```typescript
+const startup = defineStartup({
+  product: {
+    entities: {
+      Task: {
+        fields: ['title', 'description', 'status', 'priority'],
+        relationships: {
+          assignee: 'User',
+          project: 'Project'
+        }
+      }
+    }
+  }
+})
+
+// Generates complete REST API:
+// - CRUD endpoints for all entities
+// - Authentication and authorization
+// - Input validation
+// - Error handling
+// - Rate limiting
+// - API documentation
+```
+
+**What's generated**:
+- RESTful endpoints
+- GraphQL API (optional)
+- WebSocket connections
+- Authentication middleware
+- Input validation
+- Error handling
+- Rate limiting
+- Logging and monitoring
+- OpenAPI/Swagger docs
+
+**Example output**:
+```typescript
+// Auto-generated API endpoints
+app.get('/api/v1/tasks', authenticate, async (req, res) => {
+  const tasks = await db.task.findMany({
+    where: {
+      userId: req.user.id,
+      ...(req.query.status && { status: req.query.status }),
+      ...(req.query.priority && { priority: req.query.priority })
+    },
+    include: {
+      assignee: true,
+      project: true
+    },
+    orderBy: { createdAt: 'desc' }
+  })
+
+  res.json(tasks)
+})
+
+app.post('/api/v1/tasks', authenticate, validate(taskSchema), async (req, res) => {
+  const task = await db.task.create({
+    data: {
+      ...req.body,
+      userId: req.user.id
+    }
+  })
+
+  res.status(201).json(task)
+})
+
+// ... full CRUD + custom endpoints
+```
+
+## 4. CLI (Command-Line Interface)
+
+**Purpose**: Enable power users and automation
+
+**Generated from**:
+```typescript
+const startup = defineStartup({
+  cli: {
+    commands: [
+      'init',
+      'sync',
+      'create',
+      'list',
+      'update'
+    ],
+    autoGenerate: true // Generate from API
+  }
+})
+
+// Generates complete CLI:
+// - All CRUD operations
+// - Interactive prompts
+// - Config management
+// - Output formatting
+```
+
+**What's generated**:
+- Command structure
+- Interactive prompts
+- Configuration management
+- Authentication
+- Output formatting (JSON, table, etc)
+- Auto-completion
+- Help documentation
+
+**Example output**:
+```bash
+# Auto-generated CLI commands
+
+# Initialize
+$ taskflow init
+✓ Authenticated as user@company.com
+✓ Config saved to ~/.taskflow/config.json
+
+# Sync tasks
+$ taskflow sync
+Syncing tasks from:
+✓ GitHub (23 issues)
+✓ Jira (15 tasks)
+✓ Linear (8 issues)
+Complete: 46 tasks synced
+
+# Create task
+$ taskflow create
+? Title: Fix authentication bug
+? Description: Users reporting login failures
+? Priority: high
+? Project: auth-service
+✓ Task created: TASK-123
+
+# List tasks
+$ taskflow list --status open --format table
+┌──────────┬─────────────────────┬──────────┬──────────┐
+│ ID       │ Title               │ Status   │ Priority │
+├──────────┼─────────────────────┼──────────┼──────────┤
+│ TASK-123 │ Fix auth bug        │ open     │ high     │
+│ TASK-122 │ Update docs         │ open     │ medium   │
+│ TASK-121 │ Refactor API        │ open     │ low      │
+└──────────┴─────────────────────┴──────────┴──────────┘
+```
+
+## 5. MCP (Model Context Protocol Server)
+
+**Purpose**: Enable AI agent integration
+
+**Generated from**:
+```typescript
+const startup = defineStartup({
+  mcp: {
+    tools: true, // Generate tools from API
+    resources: true, // Generate resources from data
+    prompts: true // Generate prompts from use cases
+  }
+})
+
+// Generates complete MCP server:
+// - Tools for all API endpoints
+// - Resources for data access
+// - Prompts for common workflows
+```
+
+**What's generated**:
+- MCP server implementation
+- Tools from API endpoints
+- Resources from data models
+- Prompts from use cases
+- Authentication
+- Rate limiting
+
+**Example output**:
+```typescript
+// Auto-generated MCP server
+const mcpServer = {
+  tools: [
+    {
+      name: 'create_task',
+      description: 'Create a new task',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          priority: { type: 'string', enum: ['low', 'medium', 'high'] }
+        }
+      },
+      handler: async ({ title, priority }) => {
+        return await api.tasks.create({ title, priority })
+      }
+    }
+  ],
+
+  resources: [
+    {
+      uri: 'taskflow://tasks',
+      name: 'User tasks',
+      handler: async () => {
+        return await api.tasks.list()
+      }
+    }
+  ],
+
+  prompts: [
+    {
+      name: 'daily_summary',
+      description: 'Generate daily task summary',
+      handler: async () => {
+        const tasks = await api.tasks.list({ dueToday: true })
+        return `You have ${tasks.length} tasks due today...`
+      }
+    }
+  ]
+}
+```
+
+## 6. SDK (Client Libraries)
+
+**Purpose**: Enable developers to build on your platform
+
+**Generated from**:
+```typescript
+const startup = defineStartup({
+  sdk: {
+    languages: ['typescript', 'python', 'go'],
+    autoGenerate: true // Generate from API spec
+  }
+})
+
+// Generates SDKs in multiple languages:
+// - Type-safe clients
+// - Authentication handling
+// - Error handling
+// - Retry logic
+```
+
+**What's generated**:
+- Type-safe clients
+- Authentication
+- Error handling
+- Retry logic
+- Documentation
+- Examples
+
+**Example output (TypeScript SDK)**:
+```typescript
+// Auto-generated TypeScript SDK
+import { TaskFlow } from '@taskflow/sdk'
+
+const client = new TaskFlow({
+  apiKey: process.env.TASKFLOW_API_KEY
+})
+
+// Type-safe methods
+const tasks = await client.tasks.list({
+  status: 'open',
+  priority: 'high'
+})
+
+const task = await client.tasks.create({
+  title: 'New task',
+  description: 'Task description',
+  priority: 'medium'
+})
+
+await client.tasks.update(task.id, {
+  status: 'in_progress'
+})
+
+// Streaming support
+for await (const event of client.tasks.watch()) {
+  console.log('Task updated:', event)
+}
+```
+
+**Example output (Python SDK)**:
+```python
+# Auto-generated Python SDK
+from taskflow import TaskFlow
+
+client = TaskFlow(api_key=os.environ['TASKFLOW_API_KEY'])
+
+# Pythonic interface
+tasks = client.tasks.list(status='open', priority='high')
+
+task = client.tasks.create(
+    title='New task',
+    description='Task description',
+    priority='medium'
+)
+
+client.tasks.update(task.id, status='in_progress')
+```
+
+## 7. Docs (Documentation)
+
+**Purpose**: Help users understand and use your product
+
+**Generated from**:
+```typescript
+const startup = defineStartup({
+  docs: {
+    autoGenerate: true,
+    sections: [
+      'getting-started',
+      'features',
+      'api-reference',
+      'integrations',
+      'guides'
+    ]
+  }
+})
+
+// Generates complete documentation:
+// - Getting started guides
+// - Feature documentation
+// - API reference
+// - Integration guides
+// - Code examples
+```
+
+**What's generated**:
+- Getting started guide
+- Feature documentation
+- API reference
+- Integration guides
+- Code examples
+- Troubleshooting
+- FAQs
+- Search functionality
+
+**Example output**:
+```markdown
+# Getting Started with TaskFlow
+
+## Quick Start
+
+Install the TaskFlow CLI:
+
+\`\`\`bash
+npm install -g @taskflow/cli
+\`\`\`
+
+Authenticate:
+
+\`\`\`bash
+taskflow init
+\`\`\`
+
+Sync your first tasks:
+
+\`\`\`bash
+taskflow sync
+\`\`\`
+
+## Features
+
+### Unified Task View
+
+TaskFlow aggregates tasks from GitHub, Jira, and Linear into a single view.
+
+[Screenshot auto-generated from app]
+
+To enable integrations:
+
+1. Go to Settings > Integrations
+2. Connect your tools
+3. Configure sync preferences
+
+### Smart Prioritization
+
+TaskFlow uses AI to prioritize your tasks based on:
+- Deadlines
+- Dependencies
+- Business impact
+- Team capacity
+
+[Code example auto-generated from API]
+
+## API Reference
+
+See the complete [API Reference](/api) for all endpoints.
+
+Quick example:
+
+\`\`\`typescript
+const tasks = await client.tasks.list({
+  status: 'open'
+})
+\`\`\`
+```
+
+## 8. Blog (Content Marketing)
+
+**Purpose**: Drive organic traffic and educate market
+
+**Generated from**:
+```typescript
+const startup = defineStartup({
+  blog: {
+    autoGenerate: true,
+    topics: deriveFromICP(icp),
+    frequency: '2-per-week'
+  }
+})
+
+// Generates blog platform and initial content:
+// - 20+ SEO-optimized posts
+// - Content calendar
+// - Automated publishing
+```
+
+**What's generated**:
+- Blog platform (MDX)
+- 20+ initial posts
+- Content calendar
+- SEO optimization
+- Social sharing
+- Newsletter integration
+- Analytics
+
+**Example output**:
+```markdown
+# Blog Post: "5 Ways Engineering Managers Lose 10+ Hours Per Week to Tool Sprawl"
+
+Published: 2026-04-02
+Author: TaskFlow Team
+Tags: engineering-management, productivity, tools
+
+Engineering managers at fast-growing startups spend an average of 12 hours per week just switching between tools and gathering information for status reports.
+
+Here's how tool sprawl impacts productivity:
+
+## 1. Context Switching Tax
+
+Every time you switch from GitHub to Jira to Slack, you lose 23 minutes of focus...
+
+[Generated from ICP pain points and industry research]
+```
+
+## Generating All 8 Targets
+
+```bash
+# Single command generates everything
+npx startup-builder generate --all
+
+Generating build targets for TaskFlow:
+
+✓ Site (marketing website)
+  - Homepage
+  - Features page
+  - Pricing page
+  - About/Contact pages
+  - SEO optimization
+
+✓ App (product application)
+  - Authentication system
+  - Feature implementations
+  - User dashboard
+  - Settings & billing
+
+✓ API (backend services)
+  - REST endpoints
+  - GraphQL API
+  - WebSocket support
+  - OpenAPI docs
+
+✓ CLI (command-line interface)
+  - Command structure
+  - Interactive prompts
+  - Config management
+
+✓ MCP (AI agent server)
+  - Tools from API
+  - Resources from data
+  - Prompts from use cases
+
+✓ SDK (client libraries)
+  - TypeScript SDK
+  - Python SDK
+  - Go SDK
+
+✓ Docs (documentation)
+  - Getting started
+  - Feature guides
+  - API reference
+  - Integration docs
+
+✓ Blog (content platform)
+  - Blog engine
+  - 20 initial posts
+  - SEO optimization
+
+All build targets generated successfully!
+Time: 8 minutes 23 seconds
+```
+
+## Why All 8 Matter
+
+Each build target serves a different stakeholder:
+
+```typescript
+const stakeholders = {
+  site: {
+    audience: "Prospects and new visitors",
+    goal: "Convert to trial/customer",
+    metrics: ["conversion-rate", "signup-rate"]
+  },
+
+  app: {
+    audience: "Customers",
+    goal: "Deliver product value",
+    metrics: ["activation", "engagement", "retention"]
+  },
+
+  api: {
+    audience: "Your app + integrations",
+    goal: "Enable functionality",
+    metrics: ["uptime", "latency", "error-rate"]
+  },
+
+  cli: {
+    audience: "Power users + automation",
+    goal: "Advanced workflows",
+    metrics: ["adoption-rate", "daily-active-users"]
+  },
+
+  mcp: {
+    audience: "AI agents",
+    goal: "AI-native integration",
+    metrics: ["agent-usage", "tool-calls"]
+  },
+
+  sdk: {
+    audience: "Developers building integrations",
+    goal: "Ecosystem growth",
+    metrics: ["downloads", "integrations-built"]
+  },
+
+  docs: {
+    audience: "Users seeking help",
+    goal: "Self-service support",
+    metrics: ["search-success-rate", "time-to-answer"]
+  },
+
+  blog: {
+    audience: "Industry professionals",
+    goal: "Organic discovery",
+    metrics: ["traffic", "rankings", "leads"]
+  }
+}
+```
+
+## The Economics of Build Targets
+
+**Traditional approach**:
+```typescript
+const traditionalCost = {
+  site: { time: "2 weeks", cost: "developer + designer" },
+  app: { time: "8 weeks", cost: "2-3 developers" },
+  api: { time: "4 weeks", cost: "backend developer" },
+  cli: { time: "1 week", cost: "developer" },
+  mcp: { time: "1 week", cost: "developer" },
+  sdk: { time: "2 weeks per language", cost: "developer" },
+  docs: { time: "2 weeks", cost: "technical writer" },
+  blog: { time: "ongoing", cost: "content team" },
+
+  total: {
+    time: "20+ weeks",
+    cost: "$150K-250K",
+    maintenance: "$50K-100K/year"
+  }
+}
+```
+
+**startup-builder approach**:
+```typescript
+const generatedCost = {
+  allTargets: {
+    time: "10 minutes",
+    cost: "$0 (open source)",
+    maintenance: "automated updates"
+  },
+
+  savings: {
+    time: "99.9% faster",
+    cost: "$150K-250K saved",
+    maintenance: "$50K-100K/year saved"
+  }
+}
+```
+
+## Customizing Generated Targets
+
+All generated code is fully customizable:
+
+```typescript
+// Override specific components
+export default defineStartup({
+  name: "TaskFlow",
+
+  // ... business definition ...
+
+  overrides: {
+    site: {
+      // Use custom homepage
+      pages: {
+        home: './custom/HomePage.tsx'
+      }
+    },
+
+    app: {
+      // Add custom feature
+      features: {
+        customReporting: './features/Reporting.tsx'
+      }
+    },
+
+    docs: {
+      // Add custom guide
+      guides: {
+        advancedWorkflows: './docs/advanced.mdx'
+      }
+    }
+  }
+})
+```
+
+## The Full Stack in One Definition
+
+```typescript
+const myStartup = defineStartup({
+  name: "TaskFlow",
+  tagline: "Project management for distributed teams",
+
+  icp: {
+    persona: "Engineering Manager",
+    company: "Series A-C startups"
+  },
+
+  product: {
+    features: [
+      {
+        name: "Unified Task View",
+        implementation: agenticFunction("task-aggregation")
+      }
+    ],
+    pricing: {
+      tiers: [
+        { name: "Team", price: 12 },
+        { name: "Business", price: 29 }
+      ]
+    }
+  }
+})
+
+// From this single definition, generates:
+// ✓ Marketing site
+// ✓ Product app
+// ✓ Backend API
+// ✓ CLI tool
+// ✓ MCP server
+// ✓ SDKs (TypeScript, Python, Go)
+// ✓ Complete documentation
+// ✓ SEO-optimized blog
+
+// Total: 8 production-ready build targets
+// Time: ~10 minutes
+// Cost: $0
+```
+
+## Deployment
+
+```bash
+# Deploy all targets
+npx startup-builder deploy --all
+
+Deploying TaskFlow to production:
+
+✓ Site → https://taskflow.app
+✓ App → https://app.taskflow.app
+✓ API → https://api.taskflow.app
+✓ Docs → https://docs.taskflow.app
+✓ Blog → https://blog.taskflow.app
+✓ MCP → https://mcp.taskflow.app
+✓ CLI → Published to npm
+✓ SDK → Published to npm, PyPI, Go modules
+
+All build targets deployed successfully!
+```
+
+## Conclusion: The Complete Startup Ecosystem
+
+In 2026, a startup isn't just an app - it's an ecosystem of eight interconnected build targets, each serving a specific purpose and audience.
+
+With startup-builder, you get all eight automatically generated, deployed, and maintained - allowing you to focus on what makes your startup unique instead of rebuilding the same infrastructure everyone needs.
+
+---
+
+**Generate your full stack**: Get started with [startup-builder](https://startup-builder.dev) and deploy all 8 build targets in minutes.

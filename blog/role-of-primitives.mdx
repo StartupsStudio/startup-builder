@@ -1,0 +1,604 @@
+---
+title: "The Role of Primitives in Business-as-Code: Composable Business Logic"
+description: "Understand how primitives from primitives.org.ai enable composable, reusable business logic in autonomous startups."
+date: "2026-05-21"
+author: "Startup Builder Team"
+tags: ["primitives", "composability", "architecture"]
+---
+
+# The Role of Primitives in Business-as-Code: Composable Business Logic
+
+Just as software developers compose applications from reusable primitives (functions, classes, modules), startup-builder enables founders to compose businesses from reusable business primitives. This is the foundation of the Business-as-Code revolution.
+
+## What Are Business Primitives?
+
+```typescript
+import { primitives } from 'primitives.org.ai'
+
+// Business primitives are atomic, composable units of business logic
+const businessPrimitives = {
+  // Data primitives
+  data: primitives.data,
+
+  // Computation primitives
+  compute: primitives.compute,
+
+  // Communication primitives
+  communication: primitives.communication,
+
+  // Intelligence primitives
+  intelligence: primitives.intelligence,
+
+  // Integration primitives
+  integrations: primitives.integrations
+}
+```
+
+## The Primitive Hierarchy
+
+```typescript
+const primitiveStack = {
+  level1_atomic: {
+    // Cannot be decomposed further
+    examples: [
+      "send-email",
+      "query-database",
+      "call-api",
+      "generate-text",
+      "store-file"
+    ]
+  },
+
+  level2_compound: {
+    // Compose multiple atomic primitives
+    examples: [
+      "user-authentication", // email + database + token-generation
+      "payment-processing", // stripe-api + database + email-receipt
+      "content-publishing" // generate + store + cdn-upload + notify
+    ]
+  },
+
+  level3_workflows: {
+    // Compose compound primitives
+    examples: [
+      "customer-onboarding", // auth + payment + provisioning + emails
+      "sales-pipeline", // lead-gen + qualification + outreach + follow-up
+      "support-resolution" // ticket-triage + investigation + solution + communication
+    ]
+  },
+
+  level4_business: {
+    // Complete business functions
+    examples: [
+      "autonomous-customer-support",
+      "ai-powered-marketing",
+      "automated-sales-operations"
+    ]
+  }
+}
+```
+
+## Core Primitive Categories
+
+### 1. Data Primitives
+
+```typescript
+import { data } from 'primitives.org.ai'
+
+// Storage primitives
+const user = await data.store({
+  collection: 'users',
+  document: { email, name, plan }
+})
+
+// Query primitives
+const users = await data.query({
+  collection: 'users',
+  where: { plan: 'enterprise' },
+  limit: 100
+})
+
+// Transformation primitives
+const enriched = await data.transform({
+  input: users,
+  operations: [
+    data.operations.enrich({ source: 'clearbit' }),
+    data.operations.calculate({ field: 'ltv', formula: ltv Calculator }),
+    data.operations.segment({ by: 'industry' })
+  ]
+})
+
+// Synchronization primitives
+await data.sync({
+  from: 'github-issues',
+  to: 'internal-tasks',
+  mapping: issueToTaskMapper,
+  schedule: 'every-15-minutes'
+})
+```
+
+### 2. Compute Primitives
+
+```typescript
+import { compute } from 'primitives.org.ai'
+
+// Function execution
+const result = await compute.execute({
+  function: calculatePriority,
+  inputs: { tasks, deadlines, dependencies },
+  timeout: 30000
+})
+
+// Batch processing
+const processed = await compute.batch({
+  items: customers,
+  operation: enrichCustomerData,
+  concurrency: 10
+})
+
+// Scheduled execution
+await compute.schedule({
+  function: generateWeeklyReports,
+  schedule: 'every-monday-at-9am',
+  timezone: 'America/New_York'
+})
+
+// Parallel execution
+const [analytics, forecast, recommendations] = await compute.parallel([
+  compute.execute(analyzeData),
+  compute.execute(forecastTrends),
+  compute.execute(generateRecommendations)
+])
+```
+
+### 3. Communication Primitives
+
+```typescript
+import { communication } from 'primitives.org.ai'
+
+// Email primitives
+await communication.email.send({
+  to: customer.email,
+  template: 'welcome',
+  data: { name: customer.name },
+  from: 'team@startup.com'
+})
+
+// SMS primitives
+await communication.sms.send({
+  to: customer.phone,
+  message: `Your code is: ${verificationCode}`,
+  from: 'Startup'
+})
+
+// Push notification primitives
+await communication.push.send({
+  to: customer.devices,
+  title: 'New feature available',
+  body: 'Check out smart prioritization!',
+  data: { feature: 'priority', action: 'open' }
+})
+
+// In-app messaging primitives
+await communication.inApp.send({
+  to: customer.id,
+  type: 'announcement',
+  content: {
+    headline: 'Welcome to TaskFlow!',
+    description: 'Get started with these quick steps...'
+  }
+})
+
+// Webhook primitives
+await communication.webhook.send({
+  url: customer.webhookUrl,
+  event: 'task.completed',
+  data: { taskId, completedAt, completedBy }
+})
+```
+
+### 4. Intelligence Primitives
+
+```typescript
+import { intelligence } from 'primitives.org.ai'
+
+// Text generation
+const content = await intelligence.generate.text({
+  prompt: 'Write a blog post about {topic}',
+  variables: { topic: 'AI in business' },
+  model: 'claude-opus-4.5',
+  constraints: {
+    length: { min: 1500, max: 2000 },
+    tone: 'professional',
+    audience: 'technical-founders'
+  }
+})
+
+// Analysis
+const sentiment = await intelligence.analyze.sentiment({
+  text: customerFeedback,
+  aspects: ['product', 'support', 'pricing']
+})
+
+// Classification
+const category = await intelligence.classify({
+  input: supportTicket,
+  categories: ['bug', 'feature-request', 'question', 'billing'],
+  confidence: true
+})
+
+// Prediction
+const churnRisk = await intelligence.predict({
+  model: 'churn-prediction',
+  inputs: {
+    usage: customer.usage,
+    engagement: customer.engagement,
+    support: customer.supportTickets,
+    payment: customer.paymentHistory
+  }
+})
+
+// Reasoning
+const decision = await intelligence.reason({
+  problem: 'Should we offer this customer a discount?',
+  context: {
+    customer: customerProfile,
+    usage: usageData,
+    churnRisk: churnRisk,
+    ltv: customerLTV
+  },
+  guidelines: discountPolicy
+})
+```
+
+### 5. Integration Primitives
+
+```typescript
+import { integrations } from 'primitives.org.ai'
+
+// Payment processing
+const payment = await integrations.stripe.createCharge({
+  amount: 2900,
+  currency: 'usd',
+  customer: customer.stripeId,
+  description: 'Monthly subscription'
+})
+
+// Communication platforms
+await integrations.slack.postMessage({
+  channel: '#sales',
+  text: `New customer: ${customer.name} ($${mrr}/month)`
+})
+
+// Development tools
+const pr = await integrations.github.createPullRequest({
+  repo: 'my-startup',
+  title: 'Add new feature',
+  base: 'main',
+  head: 'feature/new-thing'
+})
+
+// CRM systems
+await integrations.hubspot.createContact({
+  email: customer.email,
+  properties: {
+    lifecycle_stage: 'customer',
+    mrr: customer.mrr
+  }
+})
+
+// Analytics platforms
+await integrations.segment.track({
+  userId: customer.id,
+  event: 'Feature Used',
+  properties: {
+    feature: 'ai-prioritization',
+    timestamp: Date.now()
+  }
+})
+```
+
+## Composing Primitives
+
+### Example: Customer Onboarding
+
+```typescript
+import { primitives } from 'primitives.org.ai'
+
+const customerOnboarding = async (customer) => {
+  // Compose multiple primitives into a workflow
+
+  // 1. Authentication (compound primitive)
+  const auth = await primitives.auth.createAccount({
+    email: customer.email,
+    password: customer.password,
+    providers: ['email', 'google']
+  })
+
+  // 2. Payment setup (integration primitive)
+  const payment = await primitives.integrations.stripe.createCustomer({
+    email: customer.email,
+    paymentMethod: customer.paymentMethod
+  })
+
+  // 3. Account provisioning (data + compute primitives)
+  const account = await primitives.data.store({
+    collection: 'accounts',
+    document: {
+      userId: auth.userId,
+      stripeId: payment.id,
+      plan: customer.plan,
+      limits: getPlanLimits(customer.plan)
+    }
+  })
+
+  // 4. Welcome communication (communication + intelligence primitives)
+  const welcomeEmail = await primitives.intelligence.generate.text({
+    template: 'welcome-email',
+    variables: {
+      name: customer.name,
+      plan: customer.plan
+    }
+  })
+
+  await primitives.communication.email.send({
+    to: customer.email,
+    subject: 'Welcome to TaskFlow!',
+    html: welcomeEmail
+  })
+
+  // 5. Analytics tracking (integration primitive)
+  await primitives.integrations.segment.track({
+    userId: auth.userId,
+    event: 'Account Created',
+    properties: {
+      plan: customer.plan,
+      source: customer.source
+    }
+  })
+
+  // 6. Team notification (integration primitive)
+  await primitives.integrations.slack.postMessage({
+    channel: '#growth',
+    text: `:tada: New customer: ${customer.name} (${customer.plan})`
+  })
+
+  return {
+    userId: auth.userId,
+    accountId: account.id,
+    status: 'onboarded'
+  }
+}
+```
+
+### Example: Autonomous Customer Support
+
+```typescript
+const autonomousSupport = async (ticket) => {
+  // 1. Classify the ticket (intelligence primitive)
+  const classification = await primitives.intelligence.classify({
+    input: ticket.description,
+    categories: ['bug', 'how-to', 'billing', 'feature-request']
+  })
+
+  // 2. Retrieve relevant context (data primitive)
+  const context = await primitives.data.query({
+    collections: ['docs', 'previous-tickets', 'customer-history'],
+    query: ticket.description,
+    limit: 5
+  })
+
+  // 3. Generate solution (intelligence primitive)
+  const solution = await primitives.intelligence.generate.text({
+    prompt: `Resolve this ${classification.category} ticket:\n\n${ticket.description}\n\nContext:\n${context}`,
+    model: 'claude-opus-4.5',
+    constraints: {
+      tone: 'helpful-and-professional',
+      includeSteps: true,
+      includeLinks: true
+    }
+  })
+
+  // 4. Determine confidence (intelligence primitive)
+  const confidence = await primitives.intelligence.analyze.confidence({
+    solution: solution,
+    context: context
+  })
+
+  // 5. Send response or escalate (conditional)
+  if (confidence > 0.85) {
+    // High confidence - send automated response
+    await primitives.communication.email.send({
+      to: ticket.customerEmail,
+      subject: `Re: ${ticket.subject}`,
+      html: solution
+    })
+
+    await primitives.data.update({
+      collection: 'tickets',
+      id: ticket.id,
+      updates: {
+        status: 'resolved',
+        resolvedBy: 'ai-agent',
+        resolution: solution
+      }
+    })
+  } else {
+    // Low confidence - escalate to human
+    await primitives.data.update({
+      collection: 'tickets',
+      id: ticket.id,
+      updates: {
+        status: 'escalated',
+        aiSuggestion: solution,
+        escalationReason: 'low-confidence'
+      }
+    })
+
+    await primitives.communication.slack.postMessage({
+      channel: '#support',
+      text: `Ticket #${ticket.id} needs human review (confidence: ${confidence})`
+    })
+  }
+}
+```
+
+## Building Custom Primitives
+
+Create reusable primitives for your domain:
+
+```typescript
+// Define a custom primitive
+const customPrimitive = primitives.define({
+  name: 'calculateCustomerHealthScore',
+  category: 'analytics',
+
+  inputs: {
+    customerId: 'string',
+    timeframe: 'number'
+  },
+
+  implementation: async ({ customerId, timeframe }) => {
+    // Compose existing primitives
+    const [usage, support, payment] = await primitives.compute.parallel([
+      // Usage metrics
+      primitives.data.query({
+        collection: 'events',
+        where: {
+          customerId,
+          timestamp: { gte: Date.now() - timeframe }
+        }
+      }),
+
+      // Support tickets
+      primitives.data.query({
+        collection: 'tickets',
+        where: {
+          customerId,
+          createdAt: { gte: Date.now() - timeframe }
+        }
+      }),
+
+      // Payment history
+      primitives.data.query({
+        collection: 'payments',
+        where: {
+          customerId,
+          timestamp: { gte: Date.now() - timeframe }
+        }
+      })
+    ])
+
+    // Calculate score
+    const score = calculateHealthScore({
+      usageFrequency: usage.length,
+      supportTickets: support.length,
+      paymentIssues: payment.filter(p => p.failed).length,
+      engagement: calculateEngagement(usage)
+    })
+
+    return {
+      score,
+      factors: {
+        usage: usage.length,
+        support: support.length,
+        payment: payment.filter(p => p.status === 'succeeded').length
+      },
+      recommendation: score < 50 ? 'at-risk' : score > 80 ? 'healthy' : 'neutral'
+    }
+  }
+})
+
+// Use your custom primitive
+const health = await primitives.calculateCustomerHealthScore({
+  customerId: 'cust_123',
+  timeframe: 30 * 24 * 60 * 60 * 1000 // 30 days
+})
+```
+
+## The Primitive Marketplace
+
+```typescript
+// Discover primitives
+const available = await primitives.marketplace.search({
+  category: 'marketing',
+  tags: ['email', 'automation'],
+  rating: { min: 4.5 }
+})
+
+// Install primitive
+await primitives.marketplace.install({
+  primitive: 'email-sequence-automation',
+  version: '2.1.0'
+})
+
+// Use installed primitive
+await primitives.emailSequenceAutomation.create({
+  trigger: 'user-signup',
+  emails: [
+    { delay: 0, template: 'welcome' },
+    { delay: '1-day', template: 'getting-started' },
+    { delay: '3-days', template: 'advanced-features' }
+  ]
+})
+
+// Publish your primitive
+await primitives.marketplace.publish({
+  primitive: customPrimitive,
+  license: 'MIT',
+  pricing: 'free',
+  documentation: './docs/customer-health.md'
+})
+```
+
+## Benefits of Primitive-Based Architecture
+
+```typescript
+const benefits = {
+  reusability: {
+    description: "Write once, use everywhere",
+    impact: "10x faster development"
+  },
+
+  composability: {
+    description: "Combine primitives to create complex workflows",
+    impact: "Unlimited flexibility without code"
+  },
+
+  maintainability: {
+    description: "Update primitive, all users benefit",
+    impact: "Zero technical debt"
+  },
+
+  testability: {
+    description: "Primitives are independently testable",
+    impact: "99.9% reliability"
+  },
+
+  discoverability: {
+    description: "Browse marketplace for solutions",
+    impact: "Don't reinvent the wheel"
+  },
+
+  standardization: {
+    description: "Industry-standard implementations",
+    impact: "Best practices built-in"
+  }
+}
+```
+
+## Conclusion
+
+Business primitives are the building blocks of autonomous startups. By composing tested, reusable primitives instead of writing custom code, founders can:
+
+- Build 10x faster
+- Eliminate technical debt
+- Ensure best practices
+- Focus on differentiation
+- Share and reuse across startups
+
+In 2026, successful founders don't write code - they compose primitives.
+
+---
+
+**Build with primitives**: Explore [primitives.org.ai](https://primitives.org.ai) and compose your business from reusable building blocks.

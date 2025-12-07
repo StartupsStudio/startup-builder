@@ -1,0 +1,596 @@
+---
+title: "The api.sb Architecture: Unifying Actions, Events, and Integrations"
+description: "Learn how api.sb provides a unified architecture for actions, events, and integrations in autonomous startups."
+date: "2026-04-09"
+author: "Startup Builder Team"
+tags: ["architecture", "api-sb", "integrations"]
+---
+
+# The api.sb Architecture: Unifying Actions, Events, and Integrations
+
+Every startup needs to execute actions, react to events, and integrate with external services. In 2026, `api.sb` provides a unified architecture for all three, eliminating the complexity of managing separate systems.
+
+## The Three Pillars of api.sb
+
+```typescript
+import { api } from '@startup-builder/primitives'
+
+const architecture = {
+  actions: api.actions,    // Execute operations
+  events: api.events,      // React to changes
+  integrations: api.integrations  // Connect external services
+}
+```
+
+Let's explore each pillar.
+
+## Actions: Execute Operations
+
+Actions are operations your startup performs:
+
+```typescript
+// Define an action
+const createCustomer = api.actions.define({
+  name: 'createCustomer',
+  inputs: {
+    email: 'string',
+    name: 'string',
+    plan: 'string'
+  },
+  implementation: async ({ email, name, plan }) => {
+    // Create customer in database
+    const customer = await db.customers.create({
+      email,
+      name,
+      plan,
+      createdAt: Date.now()
+    })
+
+    // Provision account
+    await api.actions.execute('provisionAccount', {
+      customerId: customer.id,
+      plan
+    })
+
+    // Send welcome email
+    await api.actions.execute('sendEmail', {
+      to: email,
+      template: 'welcome',
+      data: { name, plan }
+    })
+
+    // Emit event
+    await api.events.emit('customer.created', { customer })
+
+    return customer
+  }
+})
+
+// Execute action
+const customer = await api.actions.execute('createCustomer', {
+  email: 'user@company.com',
+  name: 'John Doe',
+  plan: 'pro'
+})
+```
+
+### Action Composition
+
+Actions can compose other actions:
+
+```typescript
+const onboardCustomer = api.actions.define({
+  name: 'onboardCustomer',
+  implementation: async ({ customer }) => {
+    // Sequential actions
+    await api.actions.execute('createCustomer', customer)
+    await api.actions.execute('scheduleKickoff', customer)
+    await api.actions.execute('sendOnboardingSequence', customer)
+
+    // Parallel actions
+    await Promise.all([
+      api.actions.execute('addToNewsletter', customer),
+      api.actions.execute('createCRMContact', customer),
+      api.actions.execute('notifySlack', {
+        channel: 'sales',
+        message: `New customer: ${customer.name}`
+      })
+    ])
+
+    return { status: 'onboarded' }
+  }
+})
+```
+
+## Events: React to Changes
+
+Events represent state changes in your system:
+
+```typescript
+// Subscribe to events
+api.events.on('customer.created', async ({ customer }) => {
+  // Send to analytics
+  await api.integrations.segment.track({
+    userId: customer.id,
+    event: 'Customer Created',
+    properties: {
+      plan: customer.plan,
+      source: customer.source
+    }
+  })
+
+  // Start onboarding workflow
+  await api.actions.execute('onboardCustomer', { customer })
+})
+
+api.events.on('payment.succeeded', async ({ payment }) => {
+  // Update customer record
+  await db.customers.update(payment.customerId, {
+    lastPayment: Date.now(),
+    mrr: payment.amount
+  })
+
+  // Send receipt
+  await api.actions.execute('sendReceipt', { payment })
+
+  // Emit event
+  await api.events.emit('revenue.recorded', {
+    amount: payment.amount,
+    customerId: payment.customerId
+  })
+})
+
+api.events.on('payment.failed', async ({ payment, reason }) => {
+  // Smart retry logic
+  await api.actions.execute('retryPayment', {
+    payment,
+    retrySchedule: determineRetrySchedule(reason)
+  })
+
+  // Notify customer
+  await api.actions.execute('sendEmail', {
+    to: payment.customerEmail,
+    template: 'payment-failed',
+    data: { reason, updatePaymentUrl }
+  })
+
+  // Alert if high-value customer
+  if (payment.customerLifetimeValue > 10000) {
+    await api.actions.execute('alertTeam', {
+      severity: 'high',
+      message: `Payment failed for high-value customer: ${payment.customerId}`
+    })
+  }
+})
+```
+
+### Event Patterns
+
+**Fan-out pattern** (one event triggers multiple actions):
+```typescript
+api.events.on('user.signed_up', async ({ user }) => {
+  await Promise.all([
+    api.actions.execute('createAccount', user),
+    api.actions.execute('sendWelcomeEmail', user),
+    api.actions.execute('addToCRM', user),
+    api.actions.execute('trackAnalytics', user),
+    api.actions.execute('notifySlack', user)
+  ])
+})
+```
+
+**Chain pattern** (events trigger other events):
+```typescript
+api.events.on('trial.started', async ({ customer }) => {
+  await api.events.emit('customer.activated', { customer })
+})
+
+api.events.on('customer.activated', async ({ customer }) => {
+  await api.events.emit('onboarding.started', { customer })
+})
+
+api.events.on('onboarding.started', async ({ customer }) => {
+  // Start onboarding sequence
+})
+```
+
+**Aggregate pattern** (collect events before acting):
+```typescript
+api.events.aggregate({
+  pattern: 'page.viewed',
+  window: '1 hour',
+  condition: (events) => events.length > 10,
+  action: async (events) => {
+    // User is highly engaged
+    await api.actions.execute('offerUpgrade', {
+      userId: events[0].userId
+    })
+  }
+})
+```
+
+## Integrations: Connect External Services
+
+Integrations connect your startup to external services:
+
+```typescript
+// Configure integrations
+const integrations = {
+  stripe: api.integrations.stripe({
+    apiKey: process.env.STRIPE_API_KEY,
+    webhooks: {
+      'payment_intent.succeeded': async (event) => {
+        await api.events.emit('payment.succeeded', {
+          payment: parseStripeEvent(event)
+        })
+      },
+      'customer.subscription.deleted': async (event) => {
+        await api.events.emit('subscription.cancelled', {
+          subscription: parseStripeEvent(event)
+        })
+      }
+    }
+  }),
+
+  github: api.integrations.github({
+    appId: process.env.GITHUB_APP_ID,
+    privateKey: process.env.GITHUB_PRIVATE_KEY,
+    webhooks: {
+      'pull_request.opened': async (event) => {
+        await api.events.emit('github.pr_opened', {
+          pr: parseGithubEvent(event)
+        })
+      }
+    }
+  }),
+
+  slack: api.integrations.slack({
+    token: process.env.SLACK_BOT_TOKEN,
+    events: {
+      'message': async (event) => {
+        if (event.text.includes('@taskflow')) {
+          await api.actions.execute('handleSlackMention', event)
+        }
+      }
+    }
+  }),
+
+  sendgrid: api.integrations.sendgrid({
+    apiKey: process.env.SENDGRID_API_KEY
+  })
+}
+```
+
+### Using Integrations
+
+```typescript
+// Stripe
+const payment = await api.integrations.stripe.createPaymentIntent({
+  amount: 2900,
+  currency: 'usd',
+  customer: customerId
+})
+
+// GitHub
+const pr = await api.integrations.github.createPullRequest({
+  owner: 'taskflow',
+  repo: 'app',
+  title: 'Feature: Smart prioritization',
+  head: 'feature/smart-priority',
+  base: 'main'
+})
+
+// Slack
+await api.integrations.slack.postMessage({
+  channel: '#engineering',
+  text: 'Deployment to production complete!',
+  blocks: [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: '*Deployment Complete* :rocket:\nVersion: 2.3.0'
+      }
+    }
+  ]
+})
+
+// SendGrid
+await api.integrations.sendgrid.send({
+  to: customer.email,
+  from: 'team@taskflow.app',
+  subject: 'Welcome to TaskFlow!',
+  html: renderTemplate('welcome', { customer })
+})
+```
+
+## Unified Workflow Example
+
+Here's how actions, events, and integrations work together:
+
+```typescript
+// 1. Customer signs up (action)
+const signupCustomer = api.actions.define({
+  name: 'signupCustomer',
+  implementation: async ({ email, password, plan }) => {
+    // Create account
+    const customer = await db.customers.create({
+      email,
+      passwordHash: await hash(password),
+      plan,
+      trialEndsAt: Date.now() + 14 * 24 * 60 * 60 * 1000 // 14 days
+    })
+
+    // Create Stripe customer
+    const stripeCustomer = await api.integrations.stripe.customers.create({
+      email,
+      metadata: { customerId: customer.id }
+    })
+
+    await db.customers.update(customer.id, {
+      stripeCustomerId: stripeCustomer.id
+    })
+
+    // Emit event
+    await api.events.emit('customer.signed_up', { customer })
+
+    return customer
+  }
+})
+
+// 2. Event triggers onboarding (event -> actions)
+api.events.on('customer.signed_up', async ({ customer }) => {
+  // Send welcome email (integration)
+  await api.integrations.sendgrid.send({
+    to: customer.email,
+    template: 'welcome',
+    data: { name: customer.name, plan: customer.plan }
+  })
+
+  // Add to CRM (integration)
+  await api.integrations.hubspot.contacts.create({
+    email: customer.email,
+    properties: {
+      lifecycle_stage: 'customer',
+      plan: customer.plan
+    }
+  })
+
+  // Track in analytics (integration)
+  await api.integrations.segment.track({
+    userId: customer.id,
+    event: 'Signed Up',
+    properties: { plan: customer.plan }
+  })
+
+  // Notify team (integration)
+  await api.integrations.slack.postMessage({
+    channel: '#sales',
+    text: `:tada: New signup: ${customer.email} (${customer.plan} plan)`
+  })
+
+  // Start onboarding sequence (action)
+  await api.actions.execute('startOnboarding', { customer })
+})
+
+// 3. Onboarding creates tasks (action -> integration -> events)
+const startOnboarding = api.actions.define({
+  name: 'startOnboarding',
+  implementation: async ({ customer }) => {
+    const tasks = [
+      { day: 0, task: 'connect-first-integration' },
+      { day: 1, task: 'invite-team-member' },
+      { day: 3, task: 'complete-first-workflow' },
+      { day: 7, task: 'explore-advanced-features' }
+    ]
+
+    for (const { day, task } of tasks) {
+      await api.actions.execute('scheduleEmail', {
+        to: customer.email,
+        template: `onboarding-${task}`,
+        sendAt: Date.now() + day * 24 * 60 * 60 * 1000
+      })
+    }
+
+    // Create onboarding checklist in app
+    await db.onboarding.create({
+      customerId: customer.id,
+      tasks: tasks.map(t => ({ ...t, completed: false }))
+    })
+
+    await api.events.emit('onboarding.started', { customer })
+  }
+})
+
+// 4. Monitor onboarding progress (events)
+api.events.on('onboarding.task_completed', async ({ customer, task }) => {
+  const onboarding = await db.onboarding.findByCustomer(customer.id)
+
+  const completedCount = onboarding.tasks.filter(t => t.completed).length
+  const totalCount = onboarding.tasks.length
+
+  // Send congratulations
+  if (completedCount === totalCount) {
+    await api.integrations.sendgrid.send({
+      to: customer.email,
+      template: 'onboarding-complete',
+      data: { name: customer.name }
+    })
+
+    await api.events.emit('onboarding.completed', { customer })
+  }
+
+  // Track progress
+  await api.integrations.segment.track({
+    userId: customer.id,
+    event: 'Onboarding Task Completed',
+    properties: {
+      task,
+      progress: completedCount / totalCount
+    }
+  })
+})
+
+// 5. Trial ending reminder (scheduled action)
+api.actions.schedule({
+  name: 'sendTrialEndingReminders',
+  schedule: 'daily at 10:00 AM',
+  implementation: async () => {
+    const endingSoon = await db.customers.findWhere({
+      trialEndsAt: {
+        gte: Date.now(),
+        lte: Date.now() + 3 * 24 * 60 * 60 * 1000 // Next 3 days
+      },
+      plan: 'trial'
+    })
+
+    for (const customer of endingSoon) {
+      const daysLeft = Math.ceil(
+        (customer.trialEndsAt - Date.now()) / (24 * 60 * 60 * 1000)
+      )
+
+      await api.integrations.sendgrid.send({
+        to: customer.email,
+        template: 'trial-ending',
+        data: {
+          name: customer.name,
+          daysLeft,
+          upgradeUrl: `https://app.taskflow.com/upgrade`
+        }
+      })
+    }
+  }
+})
+
+// 6. Convert to paid (integration webhook -> events -> actions)
+api.integrations.stripe.webhooks.on('checkout.session.completed', async (event) => {
+  const session = event.data.object
+
+  const customer = await db.customers.findBy({
+    stripeCustomerId: session.customer
+  })
+
+  await db.customers.update(customer.id, {
+    plan: session.metadata.plan,
+    trialEndsAt: null,
+    subscriptionStartedAt: Date.now()
+  })
+
+  await api.events.emit('customer.converted', {
+    customer,
+    plan: session.metadata.plan,
+    amount: session.amount_total
+  })
+})
+
+api.events.on('customer.converted', async ({ customer, plan, amount }) => {
+  // Send thank you email
+  await api.integrations.sendgrid.send({
+    to: customer.email,
+    template: 'thank-you-for-subscribing',
+    data: { name: customer.name, plan }
+  })
+
+  // Update CRM
+  await api.integrations.hubspot.contacts.update(customer.email, {
+    properties: {
+      lifecycle_stage: 'customer',
+      plan,
+      subscription_value: amount
+    }
+  })
+
+  // Notify team
+  await api.integrations.slack.postMessage({
+    channel: '#sales',
+    text: `:moneybag: ${customer.email} upgraded to ${plan} ($${amount/100}/mo)`
+  })
+
+  // Track conversion
+  await api.integrations.segment.track({
+    userId: customer.id,
+    event: 'Converted to Paid',
+    properties: { plan, amount }
+  })
+})
+```
+
+## The Power of Unification
+
+With api.sb, you have:
+
+**One API** for all operations:
+```typescript
+import { api } from '@startup-builder/primitives'
+
+// Actions
+await api.actions.execute('createCustomer', {...})
+
+// Events
+await api.events.emit('customer.created', {...})
+api.events.on('customer.created', handler)
+
+// Integrations
+await api.integrations.stripe.charges.create({...})
+```
+
+**Consistent patterns** across all services:
+```typescript
+// All integrations follow same pattern
+api.integrations.{service}.{method}({params})
+
+// All actions follow same pattern
+api.actions.execute(name, inputs)
+
+// All events follow same pattern
+api.events.on(pattern, handler)
+api.events.emit(event, data)
+```
+
+**Built-in features** across the stack:
+- Authentication
+- Rate limiting
+- Error handling
+- Retry logic
+- Logging
+- Monitoring
+- Type safety
+
+## Getting Started with api.sb
+
+```typescript
+import { api, db } from '@startup-builder/primitives'
+
+// Define your business logic using actions, events, and integrations
+export const startup = defineStartup({
+  name: 'TaskFlow',
+
+  actions: {
+    createTask: async ({ title, description }) => {
+      const task = await db.tasks.create({ title, description })
+      await api.events.emit('task.created', { task })
+      return task
+    }
+  },
+
+  events: {
+    'task.created': async ({ task }) => {
+      await api.integrations.slack.postMessage({
+        channel: '#tasks',
+        text: `New task: ${task.title}`
+      })
+    }
+  },
+
+  integrations: {
+    slack: { token: process.env.SLACK_TOKEN },
+    github: { appId: process.env.GITHUB_APP_ID }
+  }
+})
+```
+
+The api.sb architecture provides the foundation for building autonomous startups that integrate seamlessly with the world.
+
+---
+
+**Build with api.sb**: Get started with [startup-builder](https://startup-builder.dev) and leverage unified actions, events, and integrations.

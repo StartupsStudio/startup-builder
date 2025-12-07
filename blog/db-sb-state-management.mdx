@@ -1,0 +1,585 @@
+---
+title: "State Management for Autonomous Businesses: How db.sb Powers Persistent Operations"
+description: "Explore how db.sb provides sophisticated state management for autonomous startups with multi-tenancy and persistence."
+date: "2026-04-16"
+author: "Startup Builder Team"
+tags: ["database", "state-management", "db-sb"]
+---
+
+# State Management for Autonomous Businesses: How db.sb Powers Persistent Operations
+
+Autonomous startups need sophisticated state management. `db.sb` provides a unified database layer that handles user data, tenant isolation, relationships, and persistence - all inferred from your business logic.
+
+## The db.sb Philosophy
+
+```typescript
+import { db } from '@startup-builder/primitives'
+
+// Simple, type-safe queries
+const user = await db.users.findById(userId)
+const tasks = await db.tasks.findWhere({ status: 'open' })
+const customer = await db.customers.with.subscriptions.findById(customerId)
+```
+
+No manual schema definition. No migrations. No ORM configuration. Just use your data, and db.sb handles the rest.
+
+## Automatic Schema Inference
+
+db.sb infers your database schema from usage:
+
+```typescript
+// You write this:
+const task = await db.tasks.create({
+  title: "Implement AI prioritization",
+  description: "Use Claude to prioritize tasks",
+  status: "open",
+  priority: "high",
+  assigneeId: userId,
+  projectId: projectId
+})
+
+// db.sb automatically creates:
+// - tasks table
+// - Columns: id, title, description, status, priority, assigneeId, projectId, createdAt, updatedAt
+// - Indexes on foreign keys
+// - Relationships to users and projects tables
+```
+
+## Multi-Tenancy by Default
+
+Every startup-builder app is multi-tenant:
+
+```typescript
+// Tenant isolation is automatic
+const tasks = await db.tasks.findAll()
+// Only returns tasks for current tenant
+
+// Explicit tenant access (admin mode)
+const allTasks = await db.tasks.admin.findAll()
+// Returns tasks across all tenants
+
+// Cross-tenant queries (with permission)
+const customerTasks = await db.tasks.forTenant(tenantId).findAll()
+```
+
+## Type-Safe Queries
+
+Full TypeScript support:
+
+```typescript
+// Type inference from first use
+const task = await db.tasks.create({
+  title: "string",
+  status: "open" | "in_progress" | "done",
+  priority: 1 | 2 | 3
+})
+
+// TypeScript knows the shape
+task.title // string
+task.status // "open" | "in_progress" | "done"
+task.priority // number
+
+// Type-safe queries
+const openTasks = await db.tasks.findWhere({
+  status: "open", // ✓ Valid
+  priority: 1,    // ✓ Valid
+  // foo: "bar"   // ✗ Type error: foo doesn't exist
+})
+
+// Type-safe updates
+await db.tasks.update(taskId, {
+  status: "done", // ✓ Valid
+  // status: "foo" // ✗ Type error: invalid status
+})
+```
+
+## Relationships
+
+Relationships are inferred and traversable:
+
+```typescript
+// Create related data
+const user = await db.users.create({
+  email: "user@example.com",
+  name: "John Doe"
+})
+
+const project = await db.projects.create({
+  name: "Website Redesign",
+  ownerId: user.id // Relationship inferred
+})
+
+const task = await db.tasks.create({
+  title: "Update homepage",
+  projectId: project.id, // Relationship inferred
+  assigneeId: user.id    // Relationship inferred
+})
+
+// Query with relationships
+const taskWithRelations = await db.tasks
+  .with.project
+  .with.assignee
+  .findById(task.id)
+
+// taskWithRelations has:
+// {
+//   id, title, ...
+//   project: { id, name, ownerId, ... },
+//   assignee: { id, email, name, ... }
+// }
+
+// Nested relationships
+const projectWithDetails = await db.projects
+  .with.owner
+  .with.tasks.with.assignee
+  .findById(project.id)
+
+// projectWithDetails has:
+// {
+//   id, name, ...
+//   owner: { id, email, name, ... },
+//   tasks: [
+//     { id, title, ..., assignee: { id, email, ... } },
+//     ...
+//   ]
+// }
+```
+
+## Advanced Queries
+
+```typescript
+// Find where
+const highPriorityTasks = await db.tasks.findWhere({
+  priority: { gte: 3 },
+  status: { in: ["open", "in_progress"] },
+  dueDate: { lte: Date.now() }
+})
+
+// Find with operators
+const overdueTasks = await db.tasks.findWhere({
+  dueDate: { lt: Date.now() },
+  status: { ne: "done" }
+})
+
+// Find with sorting
+const sortedTasks = await db.tasks.findAll({
+  orderBy: { priority: "desc", createdAt: "asc" }
+})
+
+// Find with pagination
+const paginatedTasks = await db.tasks.findAll({
+  take: 20,
+  skip: 40 // Page 3
+})
+
+// Find with filters and relationships
+const userTasks = await db.tasks
+  .with.project
+  .with.assignee
+  .findWhere({
+    assigneeId: userId,
+    status: "in_progress"
+  })
+  .orderBy({ priority: "desc" })
+  .take(10)
+```
+
+## Real-Time Subscriptions
+
+Subscribe to data changes:
+
+```typescript
+// Subscribe to all task changes
+const unsubscribe = db.tasks.subscribe((change) => {
+  switch (change.type) {
+    case 'created':
+      console.log('New task:', change.data)
+      break
+    case 'updated':
+      console.log('Task updated:', change.data)
+      break
+    case 'deleted':
+      console.log('Task deleted:', change.id)
+      break
+  }
+})
+
+// Subscribe to specific records
+db.tasks.subscribeToId(taskId, (task) => {
+  console.log('Task changed:', task)
+})
+
+// Subscribe to filtered changes
+db.tasks.subscribeWhere({ status: "open" }, (tasks) => {
+  console.log('Open tasks changed:', tasks)
+})
+
+// Cleanup
+unsubscribe()
+```
+
+## Transactions
+
+Atomic operations:
+
+```typescript
+await db.transaction(async (tx) => {
+  // Create project
+  const project = await tx.projects.create({
+    name: "New Project"
+  })
+
+  // Create tasks
+  await Promise.all([
+    tx.tasks.create({ title: "Task 1", projectId: project.id }),
+    tx.tasks.create({ title: "Task 2", projectId: project.id }),
+    tx.tasks.create({ title: "Task 3", projectId: project.id })
+  ])
+
+  // Update user
+  await tx.users.update(userId, {
+    projectCount: { increment: 1 }
+  })
+
+  // All or nothing - if any operation fails, all rollback
+})
+```
+
+## Aggregations
+
+Built-in analytics:
+
+```typescript
+// Count
+const taskCount = await db.tasks.count()
+const openTaskCount = await db.tasks.countWhere({ status: "open" })
+
+// Sum
+const totalRevenue = await db.payments.sum('amount')
+const userRevenue = await db.payments
+  .where({ userId })
+  .sum('amount')
+
+// Average
+const avgTaskTime = await db.tasks.avg('completionTime')
+
+// Min/Max
+const oldestTask = await db.tasks.min('createdAt')
+const newestTask = await db.tasks.max('createdAt')
+
+// Group by
+const tasksByStatus = await db.tasks.groupBy('status', {
+  count: true,
+  sum: ['estimatedHours'],
+  avg: ['completionTime']
+})
+
+// Result:
+// [
+//   { status: 'open', count: 15, sumEstimatedHours: 120, avgCompletionTime: null },
+//   { status: 'done', count: 45, sumEstimatedHours: 340, avgCompletionTime: 4.2 }
+// ]
+```
+
+## Migrations and Schema Evolution
+
+Schema evolves automatically:
+
+```typescript
+// Day 1: Create tasks
+await db.tasks.create({
+  title: "Task 1",
+  status: "open"
+})
+
+// Day 30: Add priority field
+await db.tasks.create({
+  title: "Task 2",
+  status: "open",
+  priority: "high" // New field automatically added to schema
+})
+
+// Old records get default value
+const oldTask = await db.tasks.findById(task1Id)
+// oldTask.priority === null (or configured default)
+
+// Schema version tracking
+const schema = await db.schema.version()
+// { version: 2, changes: [...] }
+```
+
+## Caching
+
+Intelligent caching:
+
+```typescript
+// Automatic caching of frequently accessed data
+const user = await db.users.findById(userId)
+// Cached for 5 minutes
+
+// Force fresh data
+const freshUser = await db.users.findById(userId, { cache: false })
+
+// Configure cache per query
+const tasks = await db.tasks.findAll({
+  cache: { ttl: 60000 } // 1 minute
+})
+
+// Cache invalidation
+await db.users.update(userId, { name: "New Name" })
+// Automatically invalidates userId cache
+
+// Manual cache clearing
+await db.cache.clear('users', userId)
+await db.cache.clearAll('users')
+```
+
+## Full-Text Search
+
+Built-in search:
+
+```typescript
+// Add search index
+db.tasks.index(['title', 'description'], { type: 'fulltext' })
+
+// Search
+const results = await db.tasks.search('authentication bug', {
+  fields: ['title', 'description'],
+  fuzzy: true,
+  limit: 10
+})
+
+// Weighted search
+const weightedResults = await db.tasks.search('urgent deadline', {
+  fields: {
+    title: 2.0,      // Title matches worth 2x
+    description: 1.0  // Description matches worth 1x
+  }
+})
+
+// Search with filters
+const filtered = await db.tasks.search('api', {
+  where: {
+    status: 'open',
+    priority: { gte: 3 }
+  }
+})
+```
+
+## Audit Logging
+
+Automatic change tracking:
+
+```typescript
+// Enable audit logging
+db.tasks.enableAudit()
+
+// All changes are logged
+await db.tasks.update(taskId, { status: "done" })
+
+// Query audit log
+const history = await db.audit.findWhere({
+  table: 'tasks',
+  recordId: taskId
+})
+
+// history:
+// [
+//   {
+//     table: 'tasks',
+//     recordId: taskId,
+//     action: 'update',
+//     changes: { status: { from: 'open', to: 'done' } },
+//     userId: currentUser.id,
+//     timestamp: Date.now()
+//   }
+// ]
+
+// Restore previous version
+await db.audit.restore('tasks', taskId, versionId)
+```
+
+## Data Export/Import
+
+Easy data portability:
+
+```typescript
+// Export data
+const data = await db.export({
+  tables: ['users', 'tasks', 'projects'],
+  format: 'json', // or 'csv'
+  where: {
+    createdAt: { gte: startDate }
+  }
+})
+
+// Import data
+await db.import(data, {
+  strategy: 'upsert', // or 'replace', 'append'
+  validate: true
+})
+
+// Backup
+await db.backup({
+  destination: 's3://backups/2026-04-16',
+  compress: true
+})
+
+// Restore
+await db.restore({
+  source: 's3://backups/2026-04-16',
+  pointInTime: Date.now() - 3600000 // 1 hour ago
+})
+```
+
+## Performance Optimization
+
+Automatic query optimization:
+
+```typescript
+// Slow query detection
+db.on('slow-query', (query) => {
+  console.warn('Slow query detected:', {
+    sql: query.sql,
+    duration: query.duration,
+    suggestion: query.optimization
+  })
+})
+
+// Auto-indexing
+db.tasks.autoIndex({
+  threshold: 100, // Auto-index after 100ms queries
+  analyze: true   // Analyze query patterns
+})
+
+// Query analysis
+const analysis = await db.tasks.analyzeQuery({
+  where: { status: "open", priority: { gte: 3 } }
+})
+
+// analysis:
+// {
+//   estimatedRows: 150,
+//   indexUsed: 'idx_status_priority',
+//   estimatedDuration: 5, // ms
+//   recommendation: 'Index is optimal'
+// }
+
+// Connection pooling
+db.configure({
+  pool: {
+    min: 2,
+    max: 10
+  }
+})
+```
+
+## Multi-Database Support
+
+Support different databases per environment:
+
+```typescript
+// Development: SQLite
+if (process.env.NODE_ENV === 'development') {
+  db.configure({
+    provider: 'sqlite',
+    url: 'file:./dev.db'
+  })
+}
+
+// Production: PostgreSQL
+if (process.env.NODE_ENV === 'production') {
+  db.configure({
+    provider: 'postgres',
+    url: process.env.DATABASE_URL,
+    ssl: true
+  })
+}
+
+// Same API works across all providers
+const tasks = await db.tasks.findAll()
+```
+
+## Putting It All Together
+
+Real-world example:
+
+```typescript
+import { db } from '@startup-builder/primitives'
+
+// Create a new customer with subscription
+await db.transaction(async (tx) => {
+  // Create customer
+  const customer = await tx.customers.create({
+    email: 'user@company.com',
+    name: 'Acme Corp',
+    plan: 'enterprise'
+  })
+
+  // Create subscription
+  const subscription = await tx.subscriptions.create({
+    customerId: customer.id,
+    plan: 'enterprise',
+    amount: 29900, // $299
+    interval: 'monthly',
+    status: 'active'
+  })
+
+  // Create initial invoice
+  await tx.invoices.create({
+    customerId: customer.id,
+    subscriptionId: subscription.id,
+    amount: 29900,
+    dueDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
+    status: 'pending'
+  })
+
+  // Provision account resources
+  await tx.resources.create({
+    customerId: customer.id,
+    type: 'api-key',
+    value: generateApiKey(),
+    limits: {
+      requests: 100000,
+      storage: 100 * 1024 * 1024 * 1024 // 100GB
+    }
+  })
+
+  // Record in audit log
+  await tx.audit.create({
+    action: 'customer.created',
+    customerId: customer.id,
+    metadata: {
+      plan: 'enterprise',
+      source: 'website'
+    }
+  })
+})
+
+// Query customer with all relations
+const customer = await db.customers
+  .with.subscription
+  .with.invoices
+  .with.resources
+  .findByEmail('user@company.com')
+
+// Subscribe to customer changes
+db.customers.subscribeToId(customer.id, (updated) => {
+  console.log('Customer updated:', updated)
+})
+
+// Analytics
+const metrics = await Promise.all([
+  db.customers.countWhere({ plan: 'enterprise' }),
+  db.subscriptions.sum('amount'),
+  db.invoices.countWhere({ status: 'overdue' })
+])
+
+const [enterpriseCustomers, totalMRR, overdueInvoices] = metrics
+```
+
+db.sb provides the persistence layer for your autonomous startup - handling data, relationships, multi-tenancy, and performance automatically so you can focus on business logic.
+
+---
+
+**Build with db.sb**: Start with [startup-builder](https://startup-builder.dev) and get sophisticated state management out of the box.
