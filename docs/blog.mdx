@@ -1,0 +1,228 @@
+---
+title: Blog Platform
+description: Generate MDX-powered blog with SEO optimization
+---
+
+# Blog Platform
+
+Generate a content marketing platform with SEO optimization and social sharing.
+
+## Overview
+
+The blog generator creates:
+
+- MDX-powered blog
+- SEO optimization
+- Social sharing
+- RSS feeds
+- Newsletter integration
+- Analytics
+
+## Basic Usage
+
+```typescript
+await startup.build({
+  blog: true
+})
+```
+
+## Configuration
+
+```typescript
+startup.configureBlog({
+  framework: 'nextjs',           // nextjs | astro
+  features: {
+    rss: true,
+    sitemap: true,
+    newsletter: true,
+    comments: false,
+    socialSharing: true
+  },
+  seo: {
+    titleTemplate: '%s | MyStartup Blog',
+    defaultImage: '/og-image.png'
+  }
+})
+```
+
+## Content Structure
+
+```
+blog/
+├── posts/
+│   ├── 2024-01-15-getting-started.mdx
+│   ├── 2024-01-20-advanced-features.mdx
+│   └── 2024-02-01-case-study.mdx
+├── authors/
+│   └── team.yaml
+└── categories/
+    └── categories.yaml
+```
+
+## Post Format
+
+```mdx
+---
+title: Getting Started with MyStartup
+description: Learn how to build your first project
+date: 2024-01-15
+author: team
+category: tutorials
+tags: [getting-started, tutorial]
+image: /images/getting-started.png
+---
+
+# Getting Started with MyStartup
+
+Welcome to MyStartup! In this guide, we'll walk through...
+
+## Prerequisites
+
+- Node.js 18+
+- An API key
+
+## Step 1: Installation
+
+```bash
+npm install mystartup
+```
+
+<Callout type="info">
+Pro tip: Use environment variables for your API key.
+</Callout>
+```
+
+## SEO Features
+
+### Auto-Generated Meta Tags
+
+```typescript
+startup.configureBlog({
+  seo: {
+    titleTemplate: '%s | MyStartup Blog',
+    defaultDescription: 'Learn how to build with MyStartup',
+    openGraph: {
+      type: 'article',
+      siteName: 'MyStartup'
+    },
+    twitter: {
+      card: 'summary_large_image',
+      site: '@mystartup'
+    }
+  }
+})
+```
+
+### Sitemap & RSS
+
+```typescript
+startup.configureBlog({
+  sitemap: {
+    enabled: true,
+    changefreq: 'weekly',
+    priority: 0.8
+  },
+  rss: {
+    enabled: true,
+    title: 'MyStartup Blog',
+    description: 'Latest updates from MyStartup'
+  }
+})
+```
+
+## Newsletter Integration
+
+```typescript
+startup.configureBlog({
+  newsletter: {
+    provider: 'convertkit',      // convertkit | mailchimp | buttondown
+    formId: process.env.NEWSLETTER_FORM_ID,
+    placement: ['post-end', 'sidebar']
+  }
+})
+```
+
+## AI-Powered Content
+
+Integration with api.sb for content generation:
+
+```typescript
+import { rpc } from 'startup-builder/api'
+
+// Generate blog post draft
+const draft = await rpc('api.sb/content.generate', {
+  type: 'blog-post',
+  topic: 'How to optimize API performance',
+  style: 'technical-tutorial',
+  length: 'long'
+})
+
+// Generate SEO metadata
+const seo = await rpc('api.sb/content.seo', {
+  content: draft.content,
+  keywords: ['api', 'performance', 'optimization']
+})
+```
+
+## Social Sharing
+
+```typescript
+startup.configureBlog({
+  socialSharing: {
+    platforms: ['twitter', 'linkedin', 'facebook'],
+    style: 'floating',           // floating | inline | both
+    counts: true
+  }
+})
+```
+
+## Analytics
+
+```typescript
+startup.configureBlog({
+  analytics: {
+    provider: 'plausible',       // plausible | fathom | google
+    trackEvents: ['scroll', 'share', 'newsletter-signup']
+  }
+})
+```
+
+## Output
+
+```
+blog/
+├── app/
+│   ├── blog/
+│   │   ├── page.tsx            # Blog index
+│   │   └── [slug]/
+│   │       └── page.tsx        # Post page
+│   └── feed.xml/
+│       └── route.ts            # RSS feed
+├── content/
+│   └── posts/
+├── components/
+│   ├── PostCard.tsx
+│   ├── Newsletter.tsx
+│   └── ShareButtons.tsx
+└── package.json
+```
+
+## API
+
+### `startup.configureBlog(options)`
+
+Configure blog generation options.
+
+### `startup.addBlogPost(post)`
+
+Programmatically add a blog post.
+
+### `startup.buildBlog()`
+
+Generate the blog independently.
+
+## Related
+
+- [Site Generation](/docs/site)
+- [Documentation](/docs/docs)
+- [Sales Builder](/sales-builder)

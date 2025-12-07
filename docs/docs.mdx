@@ -1,0 +1,222 @@
+---
+title: Documentation Generation
+description: Generate beautiful documentation sites
+---
+
+# Documentation Generation
+
+Generate comprehensive documentation sites from your business definition.
+
+## Overview
+
+The docs generator creates:
+
+- Getting started guides
+- API reference documentation
+- Interactive examples
+- Search functionality
+- Version management
+
+## Basic Usage
+
+```typescript
+await startup.build({
+  docs: true
+})
+```
+
+## Configuration
+
+```typescript
+startup.configureDocs({
+  framework: 'nextra',           // nextra | docusaurus | vitepress
+  theme: 'default',
+  features: {
+    search: true,
+    darkMode: true,
+    versioning: true,
+    feedback: true,
+    analytics: true
+  },
+  sections: ['guides', 'api', 'examples', 'changelog']
+})
+```
+
+## Auto-Generated Content
+
+### API Reference
+
+Generated from your API endpoints:
+
+```typescript
+// Your API endpoint
+startup.addApiEndpoint({
+  method: 'POST',
+  path: '/api/tasks',
+  description: 'Create a new task',
+  body: {
+    title: { type: 'string', required: true },
+    description: { type: 'string' },
+    priority: { type: 'string', enum: ['low', 'medium', 'high'] }
+  },
+  response: {
+    type: 'Task'
+  }
+})
+
+// Generates documentation page with:
+// - Endpoint description
+// - Request/response schemas
+// - Code examples in multiple languages
+// - Try-it-out functionality
+```
+
+### SDK Documentation
+
+Generated from your SDK:
+
+```typescript
+// Auto-generates:
+// - Installation instructions
+// - Quick start guide
+// - Method reference
+// - Type definitions
+// - Error handling guide
+```
+
+## Custom Pages
+
+```typescript
+startup.addDocsPage({
+  slug: 'guides/custom-integration',
+  title: 'Custom Integration Guide',
+  content: `
+# Custom Integration
+
+Learn how to integrate MyStartup with your existing systems.
+
+## Prerequisites
+
+- Node.js 18+
+- API key
+
+## Steps
+
+1. Install the SDK
+2. Configure authentication
+3. Make your first API call
+  `
+})
+```
+
+## Interactive Examples
+
+```typescript
+startup.configureDocs({
+  examples: {
+    interactive: true,
+    sandbox: true,
+    languages: ['typescript', 'python', 'curl']
+  }
+})
+```
+
+Generates runnable code examples:
+
+```mdx
+<CodeExample>
+```typescript
+const client = new MyStartup({ apiKey: 'your-key' })
+const tasks = await client.tasks.list()
+```
+</CodeExample>
+```
+
+## Search
+
+```typescript
+startup.configureDocs({
+  search: {
+    provider: 'algolia',         // algolia | local | none
+    indexName: 'mystartup-docs',
+    appId: process.env.ALGOLIA_APP_ID,
+    apiKey: process.env.ALGOLIA_API_KEY
+  }
+})
+```
+
+## Versioning
+
+```typescript
+startup.configureDocs({
+  versioning: {
+    enabled: true,
+    current: '1.0',
+    versions: ['0.9', '0.8']
+  }
+})
+```
+
+## Feedback
+
+```typescript
+startup.configureDocs({
+  feedback: {
+    enabled: true,
+    type: 'thumbs',              // thumbs | rating | comment
+    destination: 'api.sb/feedback'
+  }
+})
+```
+
+## Output
+
+```
+docs/
+├── pages/
+│   ├── index.mdx
+│   ├── getting-started.mdx
+│   ├── api/
+│   │   ├── tasks.mdx
+│   │   └── projects.mdx
+│   ├── sdk/
+│   │   ├── typescript.mdx
+│   │   └── python.mdx
+│   └── changelog.mdx
+├── components/
+├── theme.config.tsx
+└── package.json
+```
+
+## Deployment
+
+```bash
+# Build static site
+npx startup-builder build --targets docs
+
+# Deploy to Vercel
+vercel docs/
+
+# Deploy to Netlify
+netlify deploy --dir=docs/out
+```
+
+## API
+
+### `startup.configureDocs(options)`
+
+Configure documentation generation options.
+
+### `startup.addDocsPage(page)`
+
+Add a custom documentation page.
+
+### `startup.buildDocs()`
+
+Generate documentation independently.
+
+## Related
+
+- [Blog Platform](/docs/blog)
+- [Site Generation](/docs/site)
+- [SDK Generation](/docs/sdk)

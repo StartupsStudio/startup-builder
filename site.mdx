@@ -1,0 +1,294 @@
+---
+$type: LandingPage
+$id: https://startup.builder
+name: Startup Builder
+title: Build Autonomous Startups with Business-as-Code
+description: Transform your business vision into a fully operational startup—Site, App, API, CLI, MCP, SDK, Docs, and Blog—all through code.
+---
+
+# Startup Builder
+
+## Hero
+
+<Hero
+  badge="Business-as-Code"
+  title="Build Autonomous Startups at the Speed of Thought"
+  subtitle="Define your business in code. Get a complete startup—Site, App, API, CLI, MCP, SDK, Docs, and Blog—generated and deployed automatically."
+  primaryCTA={{ label: "Start Building", href: "/docs/quickstart" }}
+  secondaryCTA={{ label: "View Demo", href: "/demo" }}
+/>
+
+## Logos
+
+<LogoCloud
+  title="Powering the next generation of startups"
+  logos={["startups-studio", "primitives-org-ai", "business-org-ai"]}
+/>
+
+## Problem
+
+<Section variant="problem">
+
+### The Old Way is Broken
+
+Building a startup used to mean:
+
+- **Months of setup** before writing any product code
+- **Dozens of tools** that don't talk to each other
+- **Repetitive work** for every new venture
+- **Manual operations** that don't scale
+
+Every founder rebuilds the same infrastructure. Every startup reinvents the same wheel.
+
+</Section>
+
+## Solution
+
+<Section variant="solution">
+
+### Business-as-Code Changes Everything
+
+```typescript
+const startup = Startup.create({
+  name: 'AutoLaunch',
+  icp: 'technical-founders',
+  problem: 'Building startups takes too long'
+})
+
+await startup.build({
+  site: true,
+  app: true,
+  api: true,
+  docs: true
+})
+
+// That's it. You're live.
+```
+
+Define your business logic. We generate everything else.
+
+</Section>
+
+## Features
+
+<Features
+  title="Everything You Need to Launch"
+  subtitle="One command. Complete startup infrastructure."
+  features={[
+    {
+      icon: "globe",
+      title: "Site Generation",
+      description: "Marketing sites with landing pages, pricing, testimonials, and conversion optimization—generated from your business definition."
+    },
+    {
+      icon: "app-window",
+      title: "App Scaffolding",
+      description: "Full-stack applications with authentication, dashboards, and your core features—ready for customization."
+    },
+    {
+      icon: "server",
+      title: "API Creation",
+      description: "RESTful and GraphQL endpoints with OpenAPI documentation, rate limiting, and monitoring built in."
+    },
+    {
+      icon: "terminal",
+      title: "CLI Tools",
+      description: "Command-line interfaces for your product that developers love, with autocomplete and documentation."
+    },
+    {
+      icon: "bot",
+      title: "MCP Servers",
+      description: "Model Context Protocol servers so AI agents can interact with your product natively."
+    },
+    {
+      icon: "package",
+      title: "SDK Generation",
+      description: "Client libraries in TypeScript, Python, and Go—type-safe and automatically updated."
+    },
+    {
+      icon: "book-open",
+      title: "Documentation",
+      description: "Beautiful docs sites with guides, API reference, and interactive examples."
+    },
+    {
+      icon: "pen-tool",
+      title: "Blog Platform",
+      description: "MDX-powered content platform with SEO optimization and social sharing."
+    }
+  ]}
+/>
+
+## How It Works
+
+<Steps
+  title="Launch in Three Steps"
+  steps={[
+    {
+      title: "Define Your ICP",
+      description: "Select your Ideal Customer Profile from our business ontologies. Tell us who you're building for.",
+      code: `import { Startup } from 'startup-builder'
+
+const startup = Startup.create({
+  icp: 'technical-founders',
+  industry: 'developer-tools'
+})`
+    },
+    {
+      title: "Specify Products",
+      description: "Define what you're offering with Business-as-Code primitives.",
+      code: `startup.addProduct({
+  type: 'saas',
+  name: 'AutoLaunch',
+  pricing: 'freemium'
+})`
+    },
+    {
+      title: "Build & Deploy",
+      description: "Generate and deploy your entire startup infrastructure.",
+      code: `await startup.build({
+  site: true,
+  app: true,
+  api: true,
+  docs: true
+})
+
+// Live at your-startup.com`
+    }
+  ]}
+/>
+
+## Architecture
+
+<Section>
+
+### Unified API Architecture
+
+```
+┌──────────────────────────────────────────┐
+│            Your Startup                   │
+├──────────────────────────────────────────┤
+│  startup-builder                         │
+│  ├── Site, App, API, CLI                 │
+│  ├── MCP, SDK, Docs, Blog                │
+├──────────────────────────────────────────┤
+│  api.sb          │    db.sb              │
+│  Actions         │    User Data          │
+│  Events          │    Tenant Data        │
+│  Integrations    │    Persistence        │
+└──────────────────────────────────────────┘
+```
+
+Built on [primitives.org.ai](https://primitives.org.ai) abstractions with ICP definitions from [business.org.ai](https://business.org.ai).
+
+</Section>
+
+## Stats
+
+<Stats
+  stats={[
+    { value: "10x", label: "Faster to Launch" },
+    { value: "8", label: "Build Targets" },
+    { value: "100%", label: "Code-Defined" },
+    { value: "0", label: "Manual Setup" }
+  ]}
+/>
+
+## Testimonials
+
+<Testimonials
+  testimonials={[
+    {
+      quote: "I launched three startups last month. Before Startup Builder, that would have taken a year.",
+      author: "Technical Founder",
+      role: "Portfolio Builder"
+    },
+    {
+      quote: "Business-as-Code is the abstraction I didn't know I needed. Now I can't imagine building any other way.",
+      author: "AI Builder",
+      role: "Autonomous Systems"
+    }
+  ]}
+/>
+
+## Pricing
+
+<Pricing
+  title="Start Building Today"
+  tiers={[
+    {
+      name: "Builder",
+      price: "Free",
+      description: "For individual builders",
+      features: [
+        "1 startup",
+        "All build targets",
+        "Community support",
+        "api.sb access"
+      ],
+      cta: { label: "Start Free", href: "/signup" }
+    },
+    {
+      name: "Studio",
+      price: "$99/mo",
+      description: "For startup studios",
+      features: [
+        "Unlimited startups",
+        "Priority builds",
+        "Team collaboration",
+        "Custom domains",
+        "Analytics dashboard"
+      ],
+      cta: { label: "Start Trial", href: "/signup?plan=studio" },
+      featured: true
+    },
+    {
+      name: "Enterprise",
+      price: "Custom",
+      description: "For large organizations",
+      features: [
+        "Dedicated infrastructure",
+        "SLA guarantees",
+        "Custom integrations",
+        "White-label options",
+        "24/7 support"
+      ],
+      cta: { label: "Contact Sales", href: "/contact" }
+    }
+  ]}
+/>
+
+## FAQ
+
+<FAQ
+  items={[
+    {
+      question: "What exactly gets generated?",
+      answer: "Startup Builder generates production-ready code for your Site (Next.js), App (full-stack with auth), API (REST/GraphQL), CLI (Node.js), MCP server, SDKs (TypeScript/Python/Go), Docs site, and Blog. Everything is customizable after generation."
+    },
+    {
+      question: "How does the Business-as-Code approach work?",
+      answer: "You define your business using structured primitives—ICP, products, services, pricing, features. The builder interprets these definitions and generates appropriate code for each build target. It's like infrastructure-as-code, but for entire businesses."
+    },
+    {
+      question: "Can I customize the generated code?",
+      answer: "Absolutely. All generated code is yours to modify. We use standard frameworks (Next.js, Hono, etc.) so you can extend and customize everything."
+    },
+    {
+      question: "What's the difference between api.sb and db.sb?",
+      answer: "api.sb handles actions, events, and integrations—the 'doing' layer. db.sb handles persistent user and tenant data—the 'storing' layer. Together they provide a complete backend for autonomous startup operations."
+    },
+    {
+      question: "Can AI agents operate my startup?",
+      answer: "Yes! The MCP server generation means AI agents can interact with your startup natively. Combined with primitives.org.ai abstractions, you can build fully autonomous operations."
+    }
+  ]}
+/>
+
+## CTA
+
+<CTA
+  title="Ready to Build Your Startup?"
+  subtitle="Define your business in code. Launch before lunch."
+  primaryCTA={{ label: "npx startup-builder init", href: "/docs/quickstart" }}
+  secondaryCTA={{ label: "Read the Docs", href: "/docs" }}
+/>

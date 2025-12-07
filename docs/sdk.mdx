@@ -1,0 +1,239 @@
+---
+title: SDK Generation
+description: Generate client libraries in multiple languages
+---
+
+# SDK Generation
+
+Generate type-safe client libraries for TypeScript, Python, and Go.
+
+## Overview
+
+The SDK generator creates:
+
+- TypeScript/JavaScript SDK
+- Python SDK
+- Go SDK
+- Type definitions
+- Auto-generated documentation
+
+## Basic Usage
+
+```typescript
+await startup.build({
+  sdk: true
+})
+```
+
+## Configuration
+
+```typescript
+startup.configureSdk({
+  languages: ['typescript', 'python', 'go'],
+  packageName: 'mystartup-sdk',
+  features: {
+    types: true,
+    validation: true,
+    retry: true,
+    caching: false
+  }
+})
+```
+
+## TypeScript SDK
+
+### Installation
+
+```bash
+npm install mystartup-sdk
+```
+
+### Usage
+
+```typescript
+import { MyStartup } from 'mystartup-sdk'
+
+const client = new MyStartup({
+  apiKey: process.env.MYSTARTUP_API_KEY
+})
+
+// Type-safe API calls
+const tasks = await client.tasks.list({
+  status: 'pending',
+  limit: 10
+})
+
+const task = await client.tasks.create({
+  title: 'New Task',
+  priority: 'high'
+})
+
+await client.tasks.complete(task.id)
+```
+
+### Type Definitions
+
+```typescript
+// Auto-generated types
+interface Task {
+  id: string
+  title: string
+  description?: string
+  status: 'pending' | 'in_progress' | 'completed'
+  priority: 'low' | 'medium' | 'high'
+  createdAt: Date
+  updatedAt: Date
+}
+
+interface CreateTaskInput {
+  title: string
+  description?: string
+  priority?: 'low' | 'medium' | 'high'
+}
+```
+
+## Python SDK
+
+### Installation
+
+```bash
+pip install mystartup-sdk
+```
+
+### Usage
+
+```python
+from mystartup import MyStartup
+
+client = MyStartup(api_key=os.environ['MYSTARTUP_API_KEY'])
+
+# List tasks
+tasks = client.tasks.list(status='pending', limit=10)
+
+# Create task
+task = client.tasks.create(
+    title='New Task',
+    priority='high'
+)
+
+# Complete task
+client.tasks.complete(task.id)
+```
+
+### Async Support
+
+```python
+import asyncio
+from mystartup import AsyncMyStartup
+
+async def main():
+    client = AsyncMyStartup(api_key=os.environ['MYSTARTUP_API_KEY'])
+
+    tasks = await client.tasks.list()
+
+    # Concurrent operations
+    results = await asyncio.gather(
+        client.tasks.get('task-1'),
+        client.tasks.get('task-2'),
+        client.tasks.get('task-3')
+    )
+
+asyncio.run(main())
+```
+
+## Go SDK
+
+### Installation
+
+```bash
+go get github.com/mystartup/mystartup-go
+```
+
+### Usage
+
+```go
+package main
+
+import (
+    "context"
+    "os"
+
+    mystartup "github.com/mystartup/mystartup-go"
+)
+
+func main() {
+    client := mystartup.NewClient(os.Getenv("MYSTARTUP_API_KEY"))
+
+    // List tasks
+    tasks, err := client.Tasks.List(context.Background(), &mystartup.ListTasksParams{
+        Status: "pending",
+        Limit:  10,
+    })
+
+    // Create task
+    task, err := client.Tasks.Create(context.Background(), &mystartup.CreateTaskParams{
+        Title:    "New Task",
+        Priority: "high",
+    })
+
+    // Complete task
+    err = client.Tasks.Complete(context.Background(), task.ID)
+}
+```
+
+## Error Handling
+
+All SDKs include consistent error handling:
+
+```typescript
+// TypeScript
+try {
+  await client.tasks.create({ title: '' })
+} catch (error) {
+  if (error instanceof ValidationError) {
+    console.log(error.fields) // { title: 'Required' }
+  } else if (error instanceof AuthenticationError) {
+    console.log('Invalid API key')
+  } else if (error instanceof RateLimitError) {
+    console.log(`Retry after ${error.retryAfter}ms`)
+  }
+}
+```
+
+## Output
+
+```
+sdk/
+├── typescript/
+│   ├── src/
+│   │   ├── client.ts
+│   │   ├── resources/
+│   │   └── types.ts
+│   └── package.json
+├── python/
+│   ├── mystartup/
+│   │   ├── __init__.py
+│   │   ├── client.py
+│   │   └── resources/
+│   └── pyproject.toml
+└── go/
+    ├── client.go
+    ├── resources/
+    └── go.mod
+```
+
+## API
+
+### `startup.configureSdk(options)`
+
+Configure SDK generation options.
+
+### `startup.buildSdk()`
+
+Generate SDKs independently.
+
+## Related
+
+- [API Creation](/docs/api)
+- [CLI Tools](/docs/cli)
+- [Documentation](/docs/docs)

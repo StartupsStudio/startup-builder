@@ -1,0 +1,217 @@
+---
+title: MCP Servers
+description: Generate Model Context Protocol servers for AI agent integration
+---
+
+# MCP Servers
+
+Generate MCP (Model Context Protocol) servers so AI agents can interact with your startup natively.
+
+## Overview
+
+The MCP generator creates:
+
+- MCP server with tools for your product
+- Resource definitions for your entities
+- Prompts for common operations
+- Stdio and HTTP transports
+
+## Basic Usage
+
+```typescript
+await startup.build({
+  mcp: true
+})
+```
+
+## Configuration
+
+```typescript
+startup.configureMcp({
+  name: 'mystartup-mcp',
+  transport: 'stdio',            // stdio | http
+  tools: 'auto',                 // auto | manual
+  resources: 'auto',
+  prompts: 'auto'
+})
+```
+
+## Auto-Generated Tools
+
+Tools are generated from your API endpoints:
+
+```typescript
+// Given a TaskManager product
+// Generates MCP tools:
+
+{
+  tools: [
+    {
+      name: 'create_task',
+      description: 'Create a new task',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          description: { type: 'string' },
+          priority: { type: 'string', enum: ['low', 'medium', 'high'] }
+        }
+      }
+    },
+    {
+      name: 'list_tasks',
+      description: 'List all tasks',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          status: { type: 'string', enum: ['pending', 'completed'] },
+          limit: { type: 'number' }
+        }
+      }
+    },
+    // ... more tools
+  ]
+}
+```
+
+## Custom Tools
+
+```typescript
+startup.addMcpTool({
+  name: 'analyze_project',
+  description: 'Analyze a project and provide insights',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      projectId: { type: 'string' }
+    },
+    required: ['projectId']
+  },
+  handler: 'analyzeProject'
+})
+```
+
+## Resources
+
+Resources expose your data to AI agents:
+
+```typescript
+startup.configureMcp({
+  resources: {
+    tasks: {
+      uri: 'task://{id}',
+      mimeType: 'application/json',
+      description: 'A task in the system'
+    },
+    projects: {
+      uri: 'project://{id}',
+      mimeType: 'application/json',
+      description: 'A project containing tasks'
+    }
+  }
+})
+```
+
+## Prompts
+
+Pre-configured prompts for common operations:
+
+```typescript
+startup.configureMcp({
+  prompts: {
+    'create-task': {
+      description: 'Create a new task with AI assistance',
+      arguments: [
+        { name: 'context', description: 'Context for the task' }
+      ]
+    },
+    'summarize-project': {
+      description: 'Get a summary of project status',
+      arguments: [
+        { name: 'projectId', description: 'Project to summarize' }
+      ]
+    }
+  }
+})
+```
+
+## Integration with Claude Desktop
+
+Add to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "mystartup": {
+      "command": "npx",
+      "args": ["mystartup-mcp"]
+    }
+  }
+}
+```
+
+## Integration with api.sb
+
+MCP tools connect to api.sb for execution:
+
+```typescript
+// Tool handler
+async function createTask(args) {
+  return await rpc('api.sb/tasks.create', args)
+}
+
+// The MCP server acts as a bridge between
+// AI agents and your startup's API
+```
+
+## Output
+
+```
+mcp/
+├── src/
+│   ├── tools/
+│   │   ├── tasks.ts
+│   │   └── projects.ts
+│   ├── resources/
+│   ├── prompts/
+│   └── index.ts
+├── package.json
+└── README.md
+```
+
+## Testing
+
+```bash
+# Run the MCP server
+npx mystartup-mcp
+
+# Test with MCP Inspector
+npx @modelcontextprotocol/inspector mystartup-mcp
+
+# Test specific tools
+echo '{"method":"tools/call","params":{"name":"list_tasks"}}' | npx mystartup-mcp
+```
+
+## API
+
+### `startup.configureMcp(options)`
+
+Configure MCP generation options.
+
+### `startup.addMcpTool(tool)`
+
+Add a custom tool.
+
+### `startup.addMcpResource(resource)`
+
+Add a custom resource.
+
+### `startup.buildMcp()`
+
+Generate the MCP server independently.
+
+## Related
+
+- [API Creation](/docs/api)
+- [CLI Tools](/docs/cli)
+- [SDK Generation](/docs/sdk)

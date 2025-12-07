@@ -1,0 +1,179 @@
+---
+title: App Scaffolding
+description: Generate full-stack applications with authentication and dashboards
+---
+
+# App Scaffolding
+
+Generate production-ready full-stack applications from your business definition.
+
+## Overview
+
+The app generator creates a complete application including:
+
+- Authentication (email, OAuth, magic links)
+- User dashboard
+- Admin panel
+- Core feature implementations
+- Database schema
+- API routes
+
+## Basic Usage
+
+```typescript
+await startup.build({
+  app: true
+})
+```
+
+## Configuration
+
+```typescript
+startup.configureApp({
+  framework: 'nextjs',           // nextjs | remix | astro
+  auth: {
+    providers: ['email', 'google', 'github'],
+    features: ['magic-link', 'mfa']
+  },
+  database: 'postgres',          // postgres | mysql | sqlite | planetscale
+  features: {
+    dashboard: true,
+    admin: true,
+    billing: true,
+    teams: true,
+    notifications: true
+  }
+})
+```
+
+## Authentication
+
+### Email/Password
+
+```typescript
+startup.configureApp({
+  auth: {
+    providers: ['email'],
+    passwordPolicy: {
+      minLength: 8,
+      requireUppercase: true,
+      requireNumber: true
+    }
+  }
+})
+```
+
+### OAuth Providers
+
+```typescript
+startup.configureApp({
+  auth: {
+    providers: ['google', 'github', 'twitter'],
+    callbacks: {
+      onSignIn: 'handleSignIn',
+      onSignUp: 'handleSignUp'
+    }
+  }
+})
+```
+
+### Magic Links
+
+```typescript
+startup.configureApp({
+  auth: {
+    providers: ['magic-link'],
+    magicLink: {
+      expiresIn: '15m',
+      redirectTo: '/dashboard'
+    }
+  }
+})
+```
+
+## Dashboard
+
+Generate user dashboards based on your product features:
+
+```typescript
+startup.configureApp({
+  dashboard: {
+    layout: 'sidebar',           // sidebar | topnav | minimal
+    sections: [
+      { id: 'overview', icon: 'home' },
+      { id: 'projects', icon: 'folder' },
+      { id: 'analytics', icon: 'chart' },
+      { id: 'settings', icon: 'cog' }
+    ]
+  }
+})
+```
+
+## Admin Panel
+
+```typescript
+startup.configureApp({
+  admin: {
+    features: ['users', 'billing', 'analytics', 'settings'],
+    roles: ['admin', 'moderator', 'support']
+  }
+})
+```
+
+## Billing Integration
+
+```typescript
+startup.configureApp({
+  billing: {
+    provider: 'stripe',          // stripe | paddle | lemonsqueezy
+    products: startup.products,
+    features: ['subscriptions', 'usage-billing', 'invoices']
+  }
+})
+```
+
+## Output
+
+The generated app follows standard conventions:
+
+```
+app/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/
+│   │   │   ├── login/
+│   │   │   └── signup/
+│   │   ├── (dashboard)/
+│   │   │   ├── overview/
+│   │   │   └── settings/
+│   │   └── (admin)/
+│   ├── components/
+│   ├── lib/
+│   │   ├── auth.ts
+│   │   ├── db.ts
+│   │   └── billing.ts
+│   └── types/
+├── prisma/
+│   └── schema.prisma
+└── package.json
+```
+
+## API
+
+### `startup.configureApp(options)`
+
+Configure app generation options.
+
+### `startup.addAppFeature(feature)`
+
+Add a custom feature to the application.
+
+### `startup.buildApp()`
+
+Generate the app independently of other targets.
+
+## Related
+
+- [API Creation](/docs/api)
+- [Site Generation](/docs/site)
+- [SDK Generation](/docs/sdk)

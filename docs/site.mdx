@@ -1,0 +1,157 @@
+---
+title: Site Generation
+description: Generate marketing sites and landing pages
+---
+
+# Site Generation
+
+Generate beautiful, conversion-optimized marketing sites from your business definition.
+
+## Overview
+
+The site generator creates a complete Next.js marketing site including:
+
+- Landing pages with hero sections
+- Feature showcases
+- Pricing tables
+- Testimonial sections
+- FAQ components
+- Blog integration
+- SEO optimization
+
+## Basic Usage
+
+```typescript
+await startup.build({
+  site: true
+})
+```
+
+## Configuration
+
+```typescript
+startup.configureSite({
+  template: 'saas-landing',    // saas-landing | product | service | agency
+  theme: 'modern',             // modern | minimal | bold
+  features: {
+    hero: true,
+    features: true,
+    pricing: true,
+    testimonials: true,
+    faq: true,
+    blog: true,
+    newsletter: true
+  },
+  seo: {
+    title: 'My Startup - Solve Your Problem',
+    description: 'The best solution for your needs',
+    keywords: ['keyword1', 'keyword2']
+  }
+})
+```
+
+## Templates
+
+### SaaS Landing
+
+Optimized for software-as-a-service products:
+
+```typescript
+startup.configureSite({
+  template: 'saas-landing',
+  sections: ['hero', 'logos', 'features', 'how-it-works', 'pricing', 'testimonials', 'faq', 'cta']
+})
+```
+
+### Product Page
+
+Focused on showcasing a single product:
+
+```typescript
+startup.configureSite({
+  template: 'product',
+  sections: ['hero', 'demo', 'features', 'specs', 'pricing', 'reviews']
+})
+```
+
+### Service Page
+
+Designed for service businesses:
+
+```typescript
+startup.configureSite({
+  template: 'service',
+  sections: ['hero', 'services', 'process', 'case-studies', 'team', 'contact']
+})
+```
+
+## Customization
+
+### Custom Sections
+
+```typescript
+startup.addSiteSection({
+  id: 'custom-section',
+  component: 'CustomSection',
+  props: {
+    title: 'Custom Content',
+    content: 'Your custom content here'
+  }
+})
+```
+
+### Theming
+
+```typescript
+startup.configureSite({
+  theme: {
+    colors: {
+      primary: '#0066FF',
+      secondary: '#00CC88'
+    },
+    fonts: {
+      heading: 'Inter',
+      body: 'System'
+    }
+  }
+})
+```
+
+## Output
+
+The generated site is a standard Next.js application:
+
+```
+site/
+├── app/
+│   ├── page.tsx          # Landing page
+│   ├── pricing/
+│   ├── features/
+│   └── blog/
+├── components/
+│   ├── Hero.tsx
+│   ├── Features.tsx
+│   └── Pricing.tsx
+├── styles/
+└── next.config.js
+```
+
+## API
+
+### `startup.configureSite(options)`
+
+Configure site generation options.
+
+### `startup.addSiteSection(section)`
+
+Add a custom section to the site.
+
+### `startup.buildSite()`
+
+Generate the site independently of other targets.
+
+## Related
+
+- [App Scaffolding](/docs/app)
+- [Documentation](/docs/docs)
+- [Blog Platform](/docs/blog)

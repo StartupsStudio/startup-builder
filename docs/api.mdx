@@ -1,0 +1,186 @@
+---
+title: API Creation
+description: Generate RESTful and GraphQL APIs
+---
+
+# API Creation
+
+Generate production-ready APIs from your business definition.
+
+## Overview
+
+The API generator creates:
+
+- RESTful endpoints
+- GraphQL schema and resolvers
+- OpenAPI/Swagger documentation
+- Rate limiting
+- Authentication middleware
+- Validation
+
+## Basic Usage
+
+```typescript
+await startup.build({
+  api: true
+})
+```
+
+## Configuration
+
+```typescript
+startup.configureApi({
+  type: 'rest',                  // rest | graphql | both
+  framework: 'hono',             // hono | express | fastify
+  documentation: 'openapi',      // openapi | graphql-docs
+  features: {
+    rateLimit: true,
+    auth: true,
+    validation: true,
+    logging: true
+  }
+})
+```
+
+## RESTful API
+
+### Endpoint Generation
+
+Endpoints are generated based on your product entities:
+
+```typescript
+// Given a product with entities
+startup.addProduct({
+  name: 'TaskManager',
+  entities: ['tasks', 'projects', 'users']
+})
+
+// Generates:
+// GET    /api/tasks
+// POST   /api/tasks
+// GET    /api/tasks/:id
+// PUT    /api/tasks/:id
+// DELETE /api/tasks/:id
+// ... same for projects, users
+```
+
+### Custom Endpoints
+
+```typescript
+startup.addApiEndpoint({
+  method: 'POST',
+  path: '/api/tasks/:id/complete',
+  handler: 'completeTask',
+  auth: true,
+  validation: {
+    params: { id: 'string' }
+  }
+})
+```
+
+## GraphQL API
+
+```typescript
+startup.configureApi({
+  type: 'graphql',
+  schema: {
+    queries: ['tasks', 'projects', 'user'],
+    mutations: ['createTask', 'updateTask', 'deleteTask'],
+    subscriptions: ['taskUpdated']
+  }
+})
+```
+
+## Integration with api.sb
+
+All generated APIs integrate with the api.sb backend:
+
+```typescript
+import { rpc } from 'startup-builder/api'
+
+// Actions
+await rpc('api.sb/tasks.create', { title: 'New Task' })
+await rpc('api.sb/tasks.complete', { id: 'task-123' })
+
+// Events
+await rpc('api.sb/events.emit', {
+  type: 'task.completed',
+  data: { taskId: 'task-123' }
+})
+
+// Integrations
+await rpc('api.sb/integrations.slack.notify', {
+  channel: '#tasks',
+  message: 'Task completed!'
+})
+```
+
+## Authentication
+
+```typescript
+startup.configureApi({
+  auth: {
+    type: 'jwt',                 // jwt | api-key | oauth
+    routes: {
+      public: ['/api/health', '/api/docs'],
+      protected: ['/api/*']
+    }
+  }
+})
+```
+
+## Rate Limiting
+
+```typescript
+startup.configureApi({
+  rateLimit: {
+    window: '1m',
+    max: 100,
+    by: 'ip',                    // ip | user | api-key
+    tiers: {
+      free: 100,
+      pro: 1000,
+      enterprise: 10000
+    }
+  }
+})
+```
+
+## Output
+
+```
+api/
+├── src/
+│   ├── routes/
+│   │   ├── tasks.ts
+│   │   ├── projects.ts
+│   │   └── users.ts
+│   ├── middleware/
+│   │   ├── auth.ts
+│   │   ├── rateLimit.ts
+│   │   └── validation.ts
+│   ├── schemas/
+│   └── index.ts
+├── openapi.yaml
+└── package.json
+```
+
+## API
+
+### `startup.configureApi(options)`
+
+Configure API generation options.
+
+### `startup.addApiEndpoint(endpoint)`
+
+Add a custom endpoint.
+
+### `startup.buildApi()`
+
+Generate the API independently.
+
+## Related
+
+- [App Scaffolding](/docs/app)
+- [SDK Generation](/docs/sdk)
+- [MCP Servers](/docs/mcp)

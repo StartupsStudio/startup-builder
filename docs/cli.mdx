@@ -1,0 +1,190 @@
+---
+title: CLI Tools
+description: Generate command-line interfaces for your product
+---
+
+# CLI Tools
+
+Generate developer-friendly command-line interfaces from your business definition.
+
+## Overview
+
+The CLI generator creates:
+
+- Interactive commands
+- Auto-completion
+- Help documentation
+- Configuration management
+- Output formatting (JSON, table, plain)
+
+## Basic Usage
+
+```typescript
+await startup.build({
+  cli: true
+})
+```
+
+## Configuration
+
+```typescript
+startup.configureCli({
+  name: 'mytool',
+  description: 'CLI for MyStartup',
+  commands: 'auto',              // auto | manual
+  features: {
+    autocomplete: true,
+    config: true,
+    update: true,
+    telemetry: false
+  }
+})
+```
+
+## Auto-Generated Commands
+
+Commands are generated from your API endpoints:
+
+```typescript
+// Given API endpoints for tasks
+// Generates CLI commands:
+
+mytool tasks list              # List all tasks
+mytool tasks create            # Create a task
+mytool tasks get <id>          # Get a specific task
+mytool tasks update <id>       # Update a task
+mytool tasks delete <id>       # Delete a task
+```
+
+## Custom Commands
+
+```typescript
+startup.addCliCommand({
+  name: 'deploy',
+  description: 'Deploy your application',
+  options: [
+    { name: 'env', alias: 'e', type: 'string', default: 'production' },
+    { name: 'dry-run', type: 'boolean', default: false }
+  ],
+  handler: 'handleDeploy'
+})
+```
+
+## Interactive Mode
+
+```typescript
+startup.configureCli({
+  interactive: {
+    enabled: true,
+    prompts: {
+      create: ['name', 'description', 'type'],
+      delete: ['confirm']
+    }
+  }
+})
+```
+
+## Output Formatting
+
+```typescript
+startup.configureCli({
+  output: {
+    default: 'table',            // table | json | plain
+    formats: ['table', 'json', 'csv', 'yaml']
+  }
+})
+
+// Users can then:
+// mytool tasks list --format json
+// mytool tasks list --format table
+```
+
+## Authentication
+
+```typescript
+startup.configureCli({
+  auth: {
+    type: 'token',               // token | oauth | api-key
+    storage: 'keychain',         // keychain | file | env
+    commands: {
+      login: true,
+      logout: true,
+      whoami: true
+    }
+  }
+})
+
+// Generates:
+// mytool login
+// mytool logout
+// mytool whoami
+```
+
+## Configuration Management
+
+```typescript
+startup.configureCli({
+  config: {
+    locations: ['~/.mytoolrc', '.mytoolrc'],
+    format: 'yaml',
+    options: ['apiUrl', 'defaultProject', 'outputFormat']
+  }
+})
+
+// Generates:
+// mytool config get <key>
+// mytool config set <key> <value>
+// mytool config list
+```
+
+## Output
+
+```
+cli/
+├── src/
+│   ├── commands/
+│   │   ├── tasks.ts
+│   │   ├── config.ts
+│   │   └── auth.ts
+│   ├── lib/
+│   │   ├── api.ts
+│   │   ├── output.ts
+│   │   └── config.ts
+│   └── index.ts
+├── bin/
+│   └── mytool
+└── package.json
+```
+
+## Publishing
+
+```bash
+# Build the CLI
+npx startup-builder build --targets cli
+
+# Test locally
+npm link
+
+# Publish to npm
+npm publish
+```
+
+## API
+
+### `startup.configureCli(options)`
+
+Configure CLI generation options.
+
+### `startup.addCliCommand(command)`
+
+Add a custom command.
+
+### `startup.buildCli()`
+
+Generate the CLI independently.
+
+## Related
+
+- [API Creation](/docs/api)
+- [SDK Generation](/docs/sdk)
+- [MCP Servers](/docs/mcp)

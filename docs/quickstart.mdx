@@ -1,0 +1,92 @@
+---
+title: Quickstart
+description: Launch your first autonomous startup in minutes
+---
+
+# Quickstart
+
+Get your first startup up and running in under 5 minutes.
+
+## Installation
+
+```bash
+npm install startup-builder
+```
+
+Or use the CLI directly:
+
+```bash
+npx startup-builder init
+```
+
+## Create Your First Startup
+
+```typescript
+import { Startup } from 'startup-builder'
+
+// 1. Define your startup
+const startup = Startup.create({
+  name: 'MyStartup',
+  icp: 'technical-founders',
+  industry: 'developer-tools',
+  problem: 'A specific problem you solve'
+})
+
+// 2. Add your product
+startup.addProduct({
+  type: 'saas',
+  name: 'MyProduct',
+  pricing: 'freemium',
+  features: [
+    'feature-one',
+    'feature-two',
+    'feature-three'
+  ]
+})
+
+// 3. Build and deploy
+await startup.build({
+  site: true,
+  api: true,
+  docs: true
+})
+```
+
+## Using the CLI
+
+```bash
+# Initialize a new startup
+npx startup-builder init my-startup
+
+# Add a product
+npx startup-builder add product --type saas --name "My Product"
+
+# Build specific targets
+npx startup-builder build --targets site,api,docs
+
+# Deploy to production
+npx startup-builder deploy
+```
+
+## Project Structure
+
+After initialization, your project will look like:
+
+```
+my-startup/
+├── startup.config.ts     # Main configuration
+├── src/
+│   ├── icp.ts           # ICP definition
+│   ├── products/        # Product definitions
+│   └── services/        # Service definitions
+├── site/                # Generated marketing site
+├── api/                 # Generated API
+├── docs/                # Generated documentation
+└── package.json
+```
+
+## Next Steps
+
+- [Configure your ICP](/docs/guides/icp)
+- [Define your products](/docs/guides/products)
+- [Customize build targets](/docs/configuration)
