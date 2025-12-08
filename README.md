@@ -196,11 +196,12 @@ export default defineConfig({
 
 | Package | Description |
 |---------|-------------|
-| [sales-builder](https://github.com/StartupsStudio/sales-builder) | Autonomous sales and growth workflows |
-| [builder.domains](https://github.com/StartupsStudio/builder.domains) | Free domains for builders |
-| [startup.games](https://github.com/StartupsStudio/startup.games) | Gamification for founders |
-| [rpc.do](https://www.npmjs.com/package/rpc.do) | RPC client for .do APIs |
-| [primitives.org.ai](https://github.com/dot-org-ai/primitives.org.ai) | AI primitives and abstractions |
+| [sales-builder](https://npmjs.com/package/sales-builder) | Autonomous sales and growth workflows |
+| [service-builder](https://npmjs.com/package/service-builder) | AI-delivered Services-as-Software |
+| [builder.domains](https://npmjs.com/package/builder.domains) | Free domains for builders |
+| [startup.games](https://npmjs.com/package/startup.games) | Gamification for founders |
+| [rpc.do](https://npmjs.com/package/rpc.do) | RPC client for .do APIs |
+| [primitives.org.ai](https://npmjs.com/package/primitives.org.ai) | AI primitives and abstractions |
 
 ## License
 
