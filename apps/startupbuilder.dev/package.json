@@ -1,0 +1,36 @@
+{
+  "name": "docs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && node -e \"const fs=require('fs'),p=require('path');const src='.next/standalone/apps/startupbuilder.dev/.next',dst='.next/standalone/.next';if(fs.existsSync(src)){fs.cpSync(src,dst,{recursive:true});fs.cpSync('.next/standalone/apps/startupbuilder.dev/node_modules','.next/standalone/node_modules',{recursive:true});fs.cpSync('.next/standalone/apps/startupbuilder.dev/package.json','.next/standalone/package.json');fs.cpSync('.next/standalone/apps/startupbuilder.dev/server.js','.next/standalone/server.js')}\"",
+    "build:worker": "opennextjs-cloudflare build",
+    "preview": "pnpm build:worker && wrangler dev",
+    "deploy": "pnpm build:worker && wrangler deploy",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv",
+    "types:check": "fumadocs-mdx && tsc --noEmit",
+    "postinstall": "fumadocs-mdx"
+  },
+  "dependencies": {
+    "@opennextjs/cloudflare": "^1.14.4",
+    "fumadocs-core": "16.2.3",
+    "fumadocs-mdx": "14.1.0",
+    "fumadocs-ui": "16.2.3",
+    "lucide-react": "^0.552.0",
+    "next": "16.0.7",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.16",
+    "@types/mdx": "^2.0.13",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.16",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.53.0"
+  }
+}
