@@ -27,7 +27,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "rpc.do": "latest"
+    "rpc.do": "latest",
+    "zod": "^3.22.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
